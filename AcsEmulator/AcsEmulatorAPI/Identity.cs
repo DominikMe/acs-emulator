@@ -8,13 +8,13 @@ namespace AcsEmulatorAPI
 		public static void AddIdentity(this WebApplication app)
 		{
 
-			app.MapPost("/identities", dynamic (AcsDbContext db, CreateIdentityRequest req) =>
+			app.MapPost("/identities", dynamic (AcsDbContext db, CreateIdentityRequest? req) =>
 			{
 				var user = CreateAndPersistUser(db);
 
 				var identity = user.RawId;
 
-				if (req.createTokenWithScopes == null || req.createTokenWithScopes.Length == 0)
+				if (req == null || req.createTokenWithScopes == null || req.createTokenWithScopes.Length == 0)
 					return new { identity };
 
 				var accessToken = CreateNewToken(identity, req.createTokenWithScopes);
