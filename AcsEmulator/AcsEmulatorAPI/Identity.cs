@@ -1,4 +1,6 @@
-﻿namespace AcsEmulatorAPI
+﻿using AcsEmulatorAPI.Models;
+
+namespace AcsEmulatorAPI
 {
 	// https://github.com/Azure/azure-rest-api-specs/tree/main/specification/communication/data-plane/Identity/stable/2022-10-01
 	public static class Identity
@@ -6,10 +8,11 @@
 		public static void AddIdentity(this WebApplication app)
 		{
 
-			app.MapPost("/identities", dynamic (CreateIdentityRequest req) =>
+			app.MapPost("/identities", dynamic (AcsDbContext db, CreateIdentityRequest req) =>
 			{
-				var identity = $"8:acs:{Guid.NewGuid()}";
-				// todo: store in db
+				var user = CreateAndPersistUser(db);
+
+				var identity = user.RawId;
 
 				if (req.createTokenWithScopes == null || req.createTokenWithScopes.Length == 0)
 					return new { identity };
@@ -32,6 +35,16 @@
 			token = "token", // todo: return a real jwt with skypeid, exp and acsScopes
 			expiresOn = DateTimeOffset.UtcNow.AddMinutes((double)(expiresInMinutes ?? 60)).ToString("o"),
 		};
+
+		private static User CreateAndPersistUser(AcsDbContext db)
+		{
+			var u = User.CreateNew();
+
+			db.Users.Add(u);
+			db.SaveChanges();
+
+			return u;
+		}
 
 		record CreateIdentityRequest(string[]? createTokenWithScopes);
 
