@@ -1,3 +1,4 @@
+using AcsEmulatorAPI;
 using AcsEmulatorAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,6 +32,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseHttpsRedirection();
+
+app.AddIdentity();
 
 var summaries = new[]
 {
