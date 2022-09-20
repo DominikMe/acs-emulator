@@ -1,6 +1,12 @@
 using AcsEmulatorAPI;
+using AcsEmulatorAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var connectionString = builder.Configuration.GetConnectionString("EmulatorDb");
+builder.Services.AddDbContext<AcsDbContext>(options =>
+	options.UseSqlite(connectionString));
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -14,6 +20,15 @@ if (app.Environment.IsDevelopment())
 {
 	app.UseSwagger();
 	app.UseSwaggerUI();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+	var services = scope.ServiceProvider;
+
+	var context = services.GetRequiredService<AcsDbContext>();
+	context.Database.EnsureCreated();
+	// TODO: seed data if we want
 }
 
 app.UseHttpsRedirection();
