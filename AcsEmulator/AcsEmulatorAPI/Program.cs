@@ -23,10 +23,10 @@ if (app.Environment.IsDevelopment())
 
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
+	var services = scope.ServiceProvider;
 
-    var context = services.GetRequiredService<AcsDbContext>();
-    context.Database.EnsureCreated();
+	var context = services.GetRequiredService<AcsDbContext>();
+	context.Database.EnsureCreated();
 	// TODO: seed data if we want
 }
 
