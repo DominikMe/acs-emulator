@@ -8,6 +8,8 @@ namespace AcsEmulatorAPI.Models
     {
         public DbSet<User> Users { get; set; }
 
+        public DbSet<ChatThread> ChatThreads { get; set; }
+
         public AcsDbContext(DbContextOptions<AcsDbContext> options)
             : base(options)
         {

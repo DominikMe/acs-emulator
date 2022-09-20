@@ -34,6 +34,7 @@ using (var scope = app.Services.CreateScope())
 app.UseHttpsRedirection();
 
 app.AddIdentity();
+app.AddChatEndpoints();
 
 var summaries = new[]
 {
