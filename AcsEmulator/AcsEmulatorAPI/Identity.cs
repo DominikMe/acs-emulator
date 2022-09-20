@@ -12,17 +12,18 @@ namespace AcsEmulatorAPI
 			{
 				var user = CreateAndPersistUser(db);
 
-				var identity = user.RawId;
-
 				if (req == null || req.createTokenWithScopes == null || req.createTokenWithScopes.Length == 0)
-					return new { identity };
+					return Results.Created($"/identities/{user.RawId}", new { identity = new { id = user.RawId } });
 
-				var accessToken = CreateNewToken(identity, req.createTokenWithScopes);
-				return new
+				var accessToken = CreateNewToken(user.RawId, req.createTokenWithScopes);
+				return Results.Created($"/identities/{user.RawId}", new
 				{
-					identity,
+					identity = new
+					{
+						id = user.RawId
+					},
 					accessToken
-				};
+				});
 			});
 
 			app.MapPost("/identities/{id}/:issueAccessToken", (IssueTokenRequest req, string id) => CreateNewToken(id, req.scopes, req.expiresInMinutes));
