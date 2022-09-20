@@ -1,0 +1,35 @@
+{
+  "name": "acs-emulator-clients",
+  "version": "1.0.0-beta.1",
+  "description": "JS SDK clients to run against ACS emulator",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "prebuild": "rimraf dist/",
+    "run": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DominikMe/acs-emulator.git"
+  },
+  "keywords": [
+    "Azure",
+    "Communication",
+    "Services"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DominikMe/acs-emulator/issues"
+  },
+  "homepage": "https://github.com/DominikMe/acs-emulator#readme",
+  "dependencies": {
+    "@azure/communication-identity": "latest",
+    "dotenv": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "^12.0.0",
+    "typescript": "~4.6.0",
+    "rimraf": "latest"
+  }
+}
