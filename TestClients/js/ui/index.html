@@ -1,0 +1,47 @@
+<html lang="en">
+    <head>
+        <title>Azure Communication Services Chat</title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <script src="https://github.com/Azure/communication-ui-library/releases/latest/download/chatComposite.js"></script>
+        <div id="chat-container" style="height: 500px"></div>
+        <script type="module">
+            // todo: UI to create user, create chat thread, add participants, generate or set displayname
+
+            let response = await fetch("https://localhost/identities", {
+                method: 'POST',
+                body: JSON.stringify({
+                    createTokenWithScopes: ["voip"]
+                }),
+                headers: {
+                    "content-type": "application/json"
+                }
+            });
+            const { identity, accessToken } = await response.json();
+
+            response = await fetch("https://localhost/chat/threads", {
+                method: 'POST',
+                body: JSON.stringify({
+                    createTokenWithScopes: ["voip"]
+                }),
+                withCredentials: true,
+                headers: {
+                    "authorization": `Bearer ${accessToken.token}`,
+                    "content-type": "application/json"
+                }
+            });
+            const {chatThread } = await response.json();
+
+            const chatAdapter = await chatComposite.loadChatComposite({
+                displayName: "Emil the Emulator",
+                threadId: chatThread.id,
+                userId: identity.id,
+                endpoint: "https://localhost/",
+                token: accessToken.token
+            },
+            document.getElementById('chat-container')
+        );
+        </script>
+    </body>
+</html>
