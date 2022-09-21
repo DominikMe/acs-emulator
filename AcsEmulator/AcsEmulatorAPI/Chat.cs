@@ -23,7 +23,7 @@ namespace AcsEmulatorAPI
 						CreatedOn = t.CreatedOn,
 						CreatedByCommunicationIdentifier = new CommunicationIdentifier
 						{
-							RawId = GetRawId(context)
+							RawId = GetRawId(context, app.Configuration)
 						}
 					}
 				};
@@ -32,10 +32,11 @@ namespace AcsEmulatorAPI
 			});
 		}
 
-		private static string GetRawId(HttpContext context)
+		private static string GetRawId(HttpContext context, IConfiguration config)
 		{
-			var auth = context.Request.Headers.Authorization;
-			return "123";
+			var token = context.Request.Headers.Authorization.First().Split("Bearer ")[1];
+			var parsedToken = UserToken.ValidateJwtToken(config["JwtSigningKey"], token);
+			return parsedToken.skypeid;
 		}
 	}
 }

@@ -18,7 +18,7 @@ const connectionString =
 export async function main() {
   console.log("\n== Revoke Token sample ==\n");
 
-  const client = new CommunicationIdentityClient(connectionString, { allowInsecureConnection: true });
+  const client = new CommunicationIdentityClient(connectionString);
 
   // Create user
   console.log("Creating User");
