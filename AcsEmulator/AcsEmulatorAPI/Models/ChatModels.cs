@@ -1,11 +1,13 @@
 ﻿namespace AcsEmulatorAPI.Models
 {
-	record CommunicationIdentifier(string RawId);
+	public record CommunicationIdentifier(string RawId);
 
-	record ChatParticipant(
+	public record ChatParticipant(
 		CommunicationIdentifier CommunicationIdentifier,
 		string DisplayName,
 		DateTimeOffset ShareHistoryTime);
 
-	record CreateChatThreadRequest(string Topic, List<ChatParticipant> Participants);
+	public record CreateChatThreadRequest(string Topic, List<ChatParticipant> Participants);
+
+	public record AddChatParticipantsRequest(List<ChatParticipant> Participants);
 }

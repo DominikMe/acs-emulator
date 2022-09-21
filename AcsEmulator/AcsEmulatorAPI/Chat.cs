@@ -23,6 +23,8 @@ namespace AcsEmulatorAPI
 
 				var t = ChatThread.CreateNew(req.Topic, user);
 
+				await t.AddParticipants(db, req.Participants);
+
 				await db.ChatThreads.AddAsync(t);
 				await db.SaveChangesAsync();
 
@@ -47,10 +49,8 @@ namespace AcsEmulatorAPI
 			{
 				string userRawId = principal.Claims.First(x => x.Type == "skypeid").Value;
 
-				// For now return threads created by user
-				// TODO: return all threads where user is a participant 
 				var threads = await db.ChatThreads
-					.Where(t => t.CreatedBy.RawId == userRawId)
+					.Include(t => t.Participants.Where(p => p.RawId == userRawId))
 					.Select(t => new { t.Id, t.Topic })
 					.ToListAsync();
 
@@ -59,6 +59,86 @@ namespace AcsEmulatorAPI
 					value = threads
 				});
 			});
+
+			app.MapPost(
+				"/chat/threads/{chatThreadId}/participants/:add",
+				[Authorize] async (ClaimsPrincipal principal, AcsDbContext db, string chatThreadId, AddChatParticipantsRequest req) =>
+				{
+					string userRawId = principal.Claims.First(x => x.Type == "skypeid").Value;
+
+					var thisThread = await db.ChatThreads
+						.Include(t => t.Participants)
+						.Include(t => t.UserChatThreads)
+						.FirstOrDefaultAsync(t => t.Id == chatThreadId);
+
+					var user = await db.Users
+						.Include(u => u.Threads)
+						.Include(u => u.UserChatThreads)
+						.FirstOrDefaultAsync(u => u.RawId == userRawId);
+
+					if (thisThread == null)
+					{
+						return Results.NotFound();
+					}
+
+					if (user == null)
+					{
+						return Results.Forbid();
+					}
+
+					// Current user is not a participant in the requested thread
+					if (!thisThread.Participants.Any(p => p.RawId == userRawId))
+					{
+						return Results.Forbid();
+					}
+
+					await thisThread.AddParticipants(db, req.Participants);
+
+					await db.SaveChangesAsync();
+
+					// TODO: why does Swagger say it should return 201?
+					return Results.Created($"/chat/threads/{chatThreadId}/participants", new {});
+				});
+
+			app.MapGet(
+				"/chat/threads/{chatThreadId}/participants",
+				[Authorize] async (ClaimsPrincipal principal, AcsDbContext db, string chatThreadId) =>
+				{
+					string userRawId = principal.Claims.First(x => x.Type == "skypeid").Value;
+
+					var thisThread = await db.ChatThreads
+						.Include(t => t.Participants)
+						.Include(t => t.UserChatThreads)
+						.FirstOrDefaultAsync(t => t.Id == chatThreadId);
+
+					var user = await db.Users.FindAsync(userRawId);
+
+					if (thisThread == null)
+					{
+						return Results.NotFound();
+					}
+
+					if (user == null)
+					{
+						return Results.Forbid();
+					}
+
+					// Current user is not a participant in the requested thread
+					if (!thisThread.Participants.Any(p => p.RawId == userRawId))
+					{
+						return Results.Forbid();
+					}
+
+					var participants = thisThread.UserChatThreads.Select(uct => new
+						{
+							communicationUserIdentifier = uct.UserId,
+							uct.DisplayName,
+							uct.ShareHistoryTime
+						});
+
+					// TODO: paging
+					return Results.Ok(new { value = participants });
+				});
 		}
 	}
 }

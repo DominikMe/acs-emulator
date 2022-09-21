@@ -18,7 +18,26 @@ namespace AcsEmulatorAPI.Models
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(builder);
+            builder.Entity<ChatThread>()
+                .HasOne(t => t.CreatedBy)
+                .WithMany();
+
+            builder.Entity<User>()
+                .HasMany(u => u.Threads)
+                .WithMany(t => t.Participants)
+                .UsingEntity<UserChatThread>(
+                    j => j
+                        .HasOne(uct => uct.ChatThread)
+                        .WithMany(t => t.UserChatThreads)
+                        .HasForeignKey(uct => uct.ChatThreadId),
+                    j => j
+                        .HasOne(uct => uct.User)
+                        .WithMany(u => u.UserChatThreads)
+                        .HasForeignKey(uct => uct.UserId),
+                    j =>
+                    {
+                        j.HasKey(uct => new { uct.UserId, uct.ChatThreadId });
+                    });
         }
     }
 }
