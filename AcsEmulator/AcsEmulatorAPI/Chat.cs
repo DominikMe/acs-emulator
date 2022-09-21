@@ -23,6 +23,8 @@ namespace AcsEmulatorAPI
 
 				var t = ChatThread.CreateNew(req.Topic, user);
 
+				await t.AddParticipants(db, req.Participants);
+
 				await db.ChatThreads.AddAsync(t);
 				await db.SaveChangesAsync();
 
@@ -47,10 +49,8 @@ namespace AcsEmulatorAPI
 			{
 				string userRawId = principal.Claims.First(x => x.Type == "skypeid").Value;
 
-				// For now return threads created by user
-				// TODO: return all threads where user is a participant 
 				var threads = await db.ChatThreads
-					.Where(t => t.CreatedBy.RawId == userRawId)
+					.Include(t => t.Participants.Where(p => p.RawId == userRawId))
 					.Select(t => new { t.Id, t.Topic })
 					.ToListAsync();
 
@@ -86,40 +86,13 @@ namespace AcsEmulatorAPI
 						return Results.Forbid();
 					}
 
-					if (thisThread.CreatedBy.RawId != userRawId)
+					// Current user is not a participant in the requested thread
+					if (!thisThread.Participants.Any(p => p.RawId == userRawId))
 					{
 						return Results.Forbid();
 					}
 
-					foreach (var requestParticipant in req.Participants)
-					{
-						// TODO: Not efficient to look up in a loop
-						var participantToAdd = await db.Users
-							.Include(u => u.Threads)
-							.Include(u => u.UserChatThreads)
-							.FirstOrDefaultAsync(u => u.RawId == requestParticipant.CommunicationIdentifier.RawId);
-
-						if (participantToAdd == null)
-						{
-							// TODO: add to "invalidParticipants"
-							continue;
-						}
-
-						var uct = new UserChatThread
-						{
-							User = participantToAdd,
-							ChatThread = thisThread,
-
-							ShareHistoryTime = requestParticipant.ShareHistoryTime,
-							DisplayName = requestParticipant.DisplayName
-						};
-
-						thisThread.Participants.Add(participantToAdd);
-						thisThread.UserChatThreads.Add(uct);
-
-						participantToAdd.Threads.Add(thisThread);
-						participantToAdd.UserChatThreads.Add(uct);
-					}
+					await thisThread.AddParticipants(db, req.Participants);
 
 					db.SaveChanges();
 
