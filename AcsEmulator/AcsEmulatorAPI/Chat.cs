@@ -94,10 +94,50 @@ namespace AcsEmulatorAPI
 
 					await thisThread.AddParticipants(db, req.Participants);
 
-					db.SaveChanges();
+					await db.SaveChangesAsync();
 
 					// TODO: why does Swagger say it should return 201?
 					return Results.Created($"/chat/threads/{chatThreadId}/participants", new {});
+				});
+
+			app.MapGet(
+				"/chat/threads/{chatThreadId}/participants",
+				[Authorize] async (ClaimsPrincipal principal, AcsDbContext db, string chatThreadId) =>
+				{
+					string userRawId = principal.Claims.First(x => x.Type == "skypeid").Value;
+
+					var thisThread = await db.ChatThreads
+						.Include(t => t.Participants)
+						.Include(t => t.UserChatThreads)
+						.FirstOrDefaultAsync(t => t.Id == chatThreadId);
+
+					var user = await db.Users.FindAsync(userRawId);
+
+					if (thisThread == null)
+					{
+						return Results.NotFound();
+					}
+
+					if (user == null)
+					{
+						return Results.Forbid();
+					}
+
+					// Current user is not a participant in the requested thread
+					if (!thisThread.Participants.Any(p => p.RawId == userRawId))
+					{
+						return Results.Forbid();
+					}
+
+					var participants = thisThread.UserChatThreads.Select(uct => new
+						{
+							communicationUserIdentifier = uct.UserId,
+							uct.DisplayName,
+							uct.ShareHistoryTime
+						});
+
+					// TODO: paging
+					return Results.Ok(new { value = participants });
 				});
 		}
 	}
