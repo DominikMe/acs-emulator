@@ -18,7 +18,7 @@ namespace AcsEmulatorAPI.Models
 			{ 
 				Id = $"19:{Guid.NewGuid()}",
 				Topic = topic,
-				CreatedOn = DateTimeOffset.Now,
+				CreatedOn = DateTimeOffset.UtcNow,
 				CreatedBy = createdBy
 			};
 		}
