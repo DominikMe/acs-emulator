@@ -11,6 +11,9 @@ namespace AcsEmulatorAPI.Models
         [Key]
         public string RawId { get; set; }
 
+        public virtual ICollection<ChatThread> Threads { get; set; }
+        public virtual List<UserChatThread> UserChatThreads { get; set; }
+
         public static User CreateNew(string resourceId)
         {
             string userId = Guid.NewGuid().ToString();
