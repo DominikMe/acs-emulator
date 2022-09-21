@@ -8,4 +8,6 @@
 		DateTimeOffset ShareHistoryTime);
 
 	record CreateChatThreadRequest(string Topic, List<ChatParticipant> Participants);
+
+	record AddChatParticipantsRequest(List<ChatParticipant> Participants);
 }

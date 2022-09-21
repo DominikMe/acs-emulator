@@ -57,6 +57,30 @@ namespace AcsEmulatorAPI
 					value = threads
 				});
 			});
+
+			app.MapPost(
+				"/chat/threads/{chatThreadId}/participants/:add",
+				async (HttpContext context, AcsDbContext db, string chatThreadId, AddChatParticipantsRequest req) =>
+				{
+					string userRawId = GetRawId(context, app.Configuration);
+
+					var thisThread = await db.ChatThreads.FindAsync(chatThreadId);
+
+					if (thisThread == null)
+					{
+						return Results.NotFound();
+					}
+
+					if (thisThread.CreatedBy.RawId != userRawId)
+					{
+						return Results.Forbid();
+					}
+
+					return Results.Ok();
+
+					//var idsToAdd = req.Participants.Select(p => p.)
+					//var participantsToAdd = db.Users.Where(u => req.Participants.)
+				});
 		}
 
 		private static string GetRawId(HttpContext context, IConfiguration config)
