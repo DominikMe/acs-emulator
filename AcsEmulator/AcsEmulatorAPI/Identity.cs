@@ -7,15 +7,17 @@ namespace AcsEmulatorAPI
 	{
 		public static void AddIdentity(this WebApplication app)
 		{
+			var jwtSigningKey = app.Configuration["JwtSigningKey"];
+			var resourceId = app.Configuration["ResourceId"];
 
 			app.MapPost("/identities", dynamic (AcsDbContext db, CreateIdentityRequest? req) =>
 			{
-				var user = CreateAndPersistUser(db);
+				var user = CreateAndPersistUser(db, resourceId);
 
 				if (req == null || req.createTokenWithScopes == null || req.createTokenWithScopes.Length == 0)
 					return Results.Created($"/identities/{user.RawId}", new { identity = new { id = user.RawId } });
 
-				var accessToken = CreateNewToken(user.RawId, req.createTokenWithScopes);
+				var accessToken = CreateNewToken(jwtSigningKey, resourceId, user.RawId, req.createTokenWithScopes);
 				return Results.Created($"/identities/{user.RawId}", new
 				{
 					identity = new
@@ -26,20 +28,26 @@ namespace AcsEmulatorAPI
 				});
 			});
 
-			app.MapPost("/identities/{id}/:issueAccessToken", (IssueTokenRequest req, string id) => CreateNewToken(id, req.scopes, req.expiresInMinutes));
+			app.MapPost("/identities/{id}/:issueAccessToken", (IssueTokenRequest req, string id) => CreateNewToken(jwtSigningKey, resourceId, id, req.scopes, req.expiresInMinutes));
 
 			app.MapPost("/identities/{id}/:revokeAccessTokens", (string id) => Results.StatusCode(204));
 		}
 
-		private static dynamic CreateNewToken(string identity, string[] scopes, int? expiresInMinutes = 60) => new
+		private static dynamic CreateNewToken(string signingKey, string resourceId, string identity, string[] scopes, int? expiresInMinutes = 60)
 		{
-			token = "token", // todo: return a real jwt with skypeid, exp and acsScopes
-			expiresOn = DateTimeOffset.UtcNow.AddMinutes((double)(expiresInMinutes ?? 60)).ToString("o"),
-		};
+			var expires = DateTime.UtcNow.AddMinutes(expiresInMinutes ?? 60);
+			var token = UserToken.GenerateJwtToken(signingKey, resourceId, identity, scopes, expires);
 
-		private static User CreateAndPersistUser(AcsDbContext db)
+			return new
+			{
+				token = token,
+				expiresOn = expires.ToString("o")
+			};
+		}
+
+		private static User CreateAndPersistUser(AcsDbContext db, string resourceId)
 		{
-			var u = User.CreateNew();
+			var u = User.CreateNew(resourceId);
 
 			db.Users.Add(u);
 			db.SaveChanges();
