@@ -12,7 +12,8 @@ namespace AcsEmulatorAPI.Models
 
 		public User CreatedBy { get; set; }
 
-		public ICollection<User> Participants { get; set; }
+		public virtual ICollection<User> Participants { get; set; }
+		public virtual List<UserChatThread> UserChatThreads { get; set; }
 
 		public static ChatThread CreateNew(string topic, User createdBy)
 		{

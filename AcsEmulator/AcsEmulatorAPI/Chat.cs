@@ -66,11 +66,24 @@ namespace AcsEmulatorAPI
 				{
 					string userRawId = principal.Claims.First(x => x.Type == "skypeid").Value;
 
-					var thisThread = await db.ChatThreads.FindAsync(chatThreadId);
+					var thisThread = await db.ChatThreads
+						.Include(t => t.Participants)
+						.Include(t => t.UserChatThreads)
+						.FirstOrDefaultAsync(t => t.Id == chatThreadId);
+
+					var user = await db.Users
+						.Include(u => u.Threads)
+						.Include(u => u.UserChatThreads)
+						.FirstOrDefaultAsync(u => u.RawId == userRawId);
 
 					if (thisThread == null)
 					{
 						return Results.NotFound();
+					}
+
+					if (user == null)
+					{
+						return Results.Forbid();
 					}
 
 					if (thisThread.CreatedBy.RawId != userRawId)
@@ -78,10 +91,40 @@ namespace AcsEmulatorAPI
 						return Results.Forbid();
 					}
 
-					return Results.Ok();
+					foreach (var requestParticipant in req.Participants)
+					{
+						// TODO: Not efficient to look up in a loop
+						var participantToAdd = await db.Users
+							.Include(u => u.Threads)
+							.Include(u => u.UserChatThreads)
+							.FirstOrDefaultAsync(u => u.RawId == requestParticipant.CommunicationIdentifier.RawId);
 
-					//var idsToAdd = req.Participants.Select(p => p.)
-					//var participantsToAdd = db.Users.Where(u => req.Participants.)
+						if (participantToAdd == null)
+						{
+							// TODO: add to "invalidParticipants"
+							continue;
+						}
+
+						var uct = new UserChatThread
+						{
+							User = participantToAdd,
+							ChatThread = thisThread,
+
+							ShareHistoryTime = requestParticipant.ShareHistoryTime,
+							DisplayName = requestParticipant.DisplayName
+						};
+
+						thisThread.Participants.Add(participantToAdd);
+						thisThread.UserChatThreads.Add(uct);
+
+						participantToAdd.Threads.Add(thisThread);
+						participantToAdd.UserChatThreads.Add(uct);
+					}
+
+					db.SaveChanges();
+
+					// TODO: why does Swagger say it should return 201?
+					return Results.Created($"/chat/threads/{chatThreadId}/participants", new {});
 				});
 		}
 	}
