@@ -1,6 +1,7 @@
 using AcsEmulatorAPI;
 using AcsEmulatorAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +12,29 @@ builder.Services.AddDbContext<AcsDbContext>(options =>
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+	options.AddSecurityDefinition("user auth", new OpenApiSecurityScheme
+	{
+		Scheme = "bearer",
+		Type = SecuritySchemeType.Http,
+		In = ParameterLocation.Header
+	});
+	options.AddSecurityRequirement(new OpenApiSecurityRequirement
+	{
+		{
+			new OpenApiSecurityScheme
+			{
+				Reference = new OpenApiReference
+				{
+					Id = "user auth",
+					Type = ReferenceType.SecurityScheme
+				}
+			},
+			new List<string>()
+		}
+	});
+});
 
 var app = builder.Build();
 
