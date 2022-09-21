@@ -7,7 +7,7 @@ namespace AcsEmulatorAPI
 	{
 		public static void AddChatEndpoints(this WebApplication app)
 		{
-			app.MapPost("/chat/threads", async (AcsDbContext db, CreateChatThreadRequest req) =>
+			app.MapPost("/chat/threads", async (HttpContext context, AcsDbContext db, CreateChatThreadRequest req) =>
 			{
 				var t = ChatThread.CreateNew(req.Topic);
 
@@ -23,14 +23,19 @@ namespace AcsEmulatorAPI
 						CreatedOn = t.CreatedOn,
 						CreatedByCommunicationIdentifier = new CommunicationIdentifier
 						{
-							// Todo: use user id from token
-							RawId = User.CreateNew().RawId
+							RawId = GetRawId(context)
 						}
 					}
 				};
 
 				return Results.Created($"/chat/threads/{t.Id}", result);
 			});
+		}
+
+		private static string GetRawId(HttpContext context)
+		{
+			var auth = context.Request.Headers.Authorization;
+			return "123";
 		}
 	}
 }
