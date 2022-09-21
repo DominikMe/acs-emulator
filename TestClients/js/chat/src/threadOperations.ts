@@ -29,12 +29,7 @@ export async function main() {
   // create ChatClient
   const chatClient = new ChatClient(
     endpoint,
-    new AzureCommunicationTokenCredential(userToken.token),
-    {
-      tlsOptions: {
-        pfx: "f3549d5b73397bf4fb2f9d53a1cd9aea75eb20fa"
-      }
-    }
+    new AzureCommunicationTokenCredential(userToken.token)
   );
 
   // create chat thread

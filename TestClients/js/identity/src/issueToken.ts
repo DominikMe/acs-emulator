@@ -18,7 +18,7 @@ const connectionString =
 export async function main() {
   console.log("\n== Issue Token Sample ==\n");
 
-  const client = new CommunicationIdentityClient(connectionString, { allowInsecureConnection: true });
+  const client = new CommunicationIdentityClient(connectionString);
   const scopes: TokenScope[] = ["chat"];
 
   // Create user

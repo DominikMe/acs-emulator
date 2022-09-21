@@ -23,7 +23,7 @@ export async function main() {
     "endpoint=https://<resource-name>.communication.azure.com/;<access-key>";
   const endpoint = parseConnectionString(connectionString).endpoint;
 
-  const identityClient = new CommunicationIdentityClient(connectionString, { allowInsecureConnection: true });
+  const identityClient = new CommunicationIdentityClient(connectionString);
   const user = await identityClient.createUser();
   const userToken = await identityClient.getToken(user, ["chat"]);
   const userSue = await identityClient.createUserAndToken(["chat"]);
