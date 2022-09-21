@@ -10,7 +10,7 @@ namespace AcsEmulatorAPI
 		{
 			app.MapPost("/chat/threads", async (HttpContext context, AcsDbContext db, CreateChatThreadRequest req) =>
 			{
-				string userRawId = GetRawId(context);
+				string userRawId = GetRawId(context, app.Configuration);
 
 				var user = await db.Users.FindAsync(userRawId);
 
@@ -43,7 +43,7 @@ namespace AcsEmulatorAPI
 
 			app.MapGet("/chat/threads", async (HttpContext context, AcsDbContext db) =>
 			{
-				string userRawId = GetRawId(context);
+				string userRawId = GetRawId(context, app.Configuration);
 
 				// For now return threads created by user
 				// TODO: return all threads where user is a participant 
@@ -58,10 +58,11 @@ namespace AcsEmulatorAPI
 			});
 		}
 
-		private static string GetRawId(HttpContext context)
+		private static string GetRawId(HttpContext context, IConfiguration config)
 		{
-			var auth = context.Request.Headers.Authorization;
-			return "123";
+			var token = context.Request.Headers.Authorization.First().Split("Bearer ")[1];
+			var parsedToken = UserToken.ValidateJwtToken(config["JwtSigningKey"], token);
+			return parsedToken.skypeid;
 		}
 	}
 }

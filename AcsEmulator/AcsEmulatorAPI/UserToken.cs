@@ -5,10 +5,8 @@ using System.Text;
 
 namespace AcsEmulatorAPI
 {
-	record UserToken
+	record UserToken(string skypeid, string resourceId, string acsScope)
 	{
-		public UserToken(string skypeid, string resourceId, string acsScope) { }
-
 		public static string GenerateJwtToken(string signingKey, string resourceId, string identity, string[] scopes, DateTime expires)
 		{
 			var tokenHandler = new JwtSecurityTokenHandler();
