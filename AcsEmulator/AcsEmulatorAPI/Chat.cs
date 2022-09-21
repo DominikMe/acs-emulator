@@ -62,9 +62,9 @@ namespace AcsEmulatorAPI
 
 			app.MapPost(
 				"/chat/threads/{chatThreadId}/participants/:add",
-				async (HttpContext context, AcsDbContext db, string chatThreadId, AddChatParticipantsRequest req) =>
+				[Authorize] async (ClaimsPrincipal principal, AcsDbContext db, string chatThreadId, AddChatParticipantsRequest req) =>
 				{
-					string userRawId = GetRawId(context, app.Configuration);
+					string userRawId = principal.Claims.First(x => x.Type == "skypeid").Value;
 
 					var thisThread = await db.ChatThreads.FindAsync(chatThreadId);
 
