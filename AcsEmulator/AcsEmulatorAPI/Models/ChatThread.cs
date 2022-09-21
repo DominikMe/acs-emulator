@@ -10,13 +10,16 @@ namespace AcsEmulatorAPI.Models
 
 		public DateTimeOffset CreatedOn { get; set; }
 
-		public static ChatThread CreateNew(string topic)
+		public User CreatedBy { get; set; }
+
+		public static ChatThread CreateNew(string topic, User createdBy)
 		{
 			return new ChatThread
 			{ 
 				Id = $"19:{Guid.NewGuid()}",
 				Topic = topic,
-				CreatedOn = DateTimeOffset.Now
+				CreatedOn = DateTimeOffset.Now,
+				CreatedBy = createdBy
 			};
 		}
 	}

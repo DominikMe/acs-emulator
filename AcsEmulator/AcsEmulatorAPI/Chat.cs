@@ -1,4 +1,5 @@
 ﻿using AcsEmulatorAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace AcsEmulatorAPI
 {
@@ -9,7 +10,16 @@ namespace AcsEmulatorAPI
 		{
 			app.MapPost("/chat/threads", async (HttpContext context, AcsDbContext db, CreateChatThreadRequest req) =>
 			{
-				var t = ChatThread.CreateNew(req.Topic);
+				string userRawId = GetRawId(context);
+
+				var user = await db.Users.FindAsync(userRawId);
+
+				if (user == null)
+				{
+					return Results.Forbid();
+				}
+
+				var t = ChatThread.CreateNew(req.Topic, user);
 
 				await db.ChatThreads.AddAsync(t);
 				await db.SaveChangesAsync();
@@ -23,12 +33,28 @@ namespace AcsEmulatorAPI
 						t.CreatedOn,
 						CreatedByCommunicationIdentifier = new
 						{
-							RawId = GetRawId(context)
+							user.RawId
 						}
 					}
 				};
 
 				return Results.Created($"/chat/threads/{t.Id}", result);
+			});
+
+			app.MapGet("/chat/threads", async (HttpContext context, AcsDbContext db) =>
+			{
+				string userRawId = GetRawId(context);
+
+				// For now return threads created by user
+				// TODO: return all threads where user is a participant 
+				var threads = await db.ChatThreads
+					.Where(t => t.CreatedBy.RawId == userRawId)
+					.ToListAsync();
+
+				return Results.Ok(new
+				{
+					value = threads
+				});
 			});
 		}
 
