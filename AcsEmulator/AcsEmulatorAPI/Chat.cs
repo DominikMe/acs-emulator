@@ -1,5 +1,7 @@
 ﻿using AcsEmulatorAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace AcsEmulatorAPI
 {
@@ -8,9 +10,9 @@ namespace AcsEmulatorAPI
 	{
 		public static void AddChatEndpoints(this WebApplication app)
 		{
-			app.MapPost("/chat/threads", async (HttpContext context, AcsDbContext db, CreateChatThreadRequest req) =>
+			app.MapPost("/chat/threads", [Authorize] async (ClaimsPrincipal principal, AcsDbContext db, CreateChatThreadRequest req) =>
 			{
-				string userRawId = GetRawId(context, app.Configuration);
+				string userRawId = principal.Claims.First(x => x.Type == "skypeid").Value;
 
 				var user = await db.Users.FindAsync(userRawId);
 
@@ -41,9 +43,9 @@ namespace AcsEmulatorAPI
 				return Results.Created($"/chat/threads/{t.Id}", result);
 			});
 
-			app.MapGet("/chat/threads", async (HttpContext context, AcsDbContext db) =>
+			app.MapGet("/chat/threads", [Authorize] async (ClaimsPrincipal principal, AcsDbContext db) =>
 			{
-				string userRawId = GetRawId(context, app.Configuration);
+				string userRawId = principal.Claims.First(x => x.Type == "skypeid").Value;
 
 				// For now return threads created by user
 				// TODO: return all threads where user is a participant 
@@ -81,13 +83,6 @@ namespace AcsEmulatorAPI
 					//var idsToAdd = req.Participants.Select(p => p.)
 					//var participantsToAdd = db.Users.Where(u => req.Participants.)
 				});
-		}
-
-		private static string GetRawId(HttpContext context, IConfiguration config)
-		{
-			var token = context.Request.Headers.Authorization.First().Split("Bearer ")[1];
-			var parsedToken = UserToken.ValidateJwtToken(config["JwtSigningKey"], token);
-			return parsedToken.skypeid;
 		}
 	}
 }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace AcsEmulatorAPI
 {
-	record UserToken(string skypeid, string resourceId, string acsScope)
+	static class UserToken
 	{
 		public static string GenerateJwtToken(string signingKey, string resourceId, string identity, string[] scopes, DateTime expires)
 		{
@@ -26,35 +26,17 @@ namespace AcsEmulatorAPI
 			return tokenHandler.WriteToken(token);
 		}
 
-		// todo add proper auth middleware
-		public static UserToken ValidateJwtToken(string signingKey, string token)
+		public static TokenValidationParameters GetTokenValidationParameters(string jwtSigningKey) => new TokenValidationParameters
 		{
-			var tokenHandler = new JwtSecurityTokenHandler();
-			var key = Encoding.ASCII.GetBytes(signingKey);
-			try
-			{
-				tokenHandler.ValidateToken(token, new TokenValidationParameters
-				{
-					ValidateIssuerSigningKey = true,
-					IssuerSigningKey = new SymmetricSecurityKey(key),
-					ValidateIssuer = false,
-					ValidateAudience = false,
-					// set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
-					ClockSkew = TimeSpan.Zero
-				}, out SecurityToken validatedToken);
+			ValidateIssuerSigningKey = true,
+			IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSigningKey)),
+			ValidateIssuer = false,
+			ValidateAudience = false,
+			// set clockskew to zero so tokens expire exactly at token expiration time (instead of 5 minutes later)
+			ClockSkew = TimeSpan.Zero
+		};
 
-				var jwtToken = (JwtSecurityToken)validatedToken;
-				var skypeid = jwtToken.Claims.First(x => x.Type == "skypeid").Value;
-				var resourceId = jwtToken.Claims.First(x => x.Type == "resourceId").Value;
-				var acsScope = jwtToken.Claims.First(x => x.Type == "acsScope").Value;
-
-				return new UserToken(skypeid, resourceId, acsScope);
-			}
-			catch
-			{
-				Console.Error.WriteLine("Token failed validation");
-				throw;
-			}
-		}
+		// todo use to validate acsScope for chat
+		public static bool HasAcsScope(IEnumerable<Claim> claims, string scope) => claims.First(x => x.Type == "acsScope").Value.Split(" ").Any(x => x == scope);
 	}
 }
