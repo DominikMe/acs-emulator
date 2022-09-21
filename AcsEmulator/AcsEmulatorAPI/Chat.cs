@@ -14,14 +14,14 @@ namespace AcsEmulatorAPI
 				await db.ChatThreads.AddAsync(t);
 				await db.SaveChangesAsync();
 
-				var result = new CreateChatThreadResult
+				var result = new
 				{
-					ChatThread = new ChatThreadProperties
+					ChatThread = new
 					{
-						Id = t.Id,
-						Topic = t.Topic,
-						CreatedOn = t.CreatedOn,
-						CreatedByCommunicationIdentifier = new CommunicationIdentifier
+						t.Id,
+						t.Topic,
+						t.CreatedOn,
+						CreatedByCommunicationIdentifier = new
 						{
 							RawId = GetRawId(context)
 						}
