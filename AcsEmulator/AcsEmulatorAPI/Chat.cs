@@ -49,6 +49,7 @@ namespace AcsEmulatorAPI
 				// TODO: return all threads where user is a participant 
 				var threads = await db.ChatThreads
 					.Where(t => t.CreatedBy.RawId == userRawId)
+					.Select(t => new { t.Id, t.Topic })
 					.ToListAsync();
 
 				return Results.Ok(new
