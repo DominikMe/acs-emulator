@@ -148,6 +148,51 @@ namespace AcsEmulatorAPI
 					// TODO: paging
 					return Results.Ok(new { value = participants });
 				});
+
+			app.MapPost(
+				"/chat/threads/{chatThreadId}/messages",
+				[Authorize] async (ClaimsPrincipal principal, AcsDbContext db, string chatThreadId, SendChatMessageRequest req) =>
+				{
+					string userRawId = principal.Claims.First(x => x.Type == "skypeid").Value;
+
+					var thisThread = await db.ChatThreads
+						.Include(t => t.Participants)
+						.Include(t => t.UserChatThreads)
+						.Include(t => t.Messages)
+						.FirstOrDefaultAsync(t => t.Id == chatThreadId);
+
+					var user = await db.Users.FindAsync(userRawId);
+
+					if (thisThread == null)
+					{
+						return Results.NotFound();
+					}
+
+					if (user == null)
+					{
+						return Results.Forbid();
+					}
+
+					// Current user is not a participant in the requested thread
+					if (!thisThread.Participants.Any(p => p.RawId == userRawId))
+					{
+						return Results.Forbid();
+					}
+
+					var msg = new ChatMessage
+					{
+						Content = req.Content,
+						SenderDisplayName = req.SenderDisplayName,
+						Type = req.Type ?? ChatMessageType.Text
+					};
+					thisThread.Messages.Add(msg);
+
+					await db.SaveChangesAsync();
+
+					return Results.Created(
+						$"/chat/threads/{chatThreadId}/messages/{msg.Id}",
+						new { msg.Id });
+				});
 		}
 	}
 }
