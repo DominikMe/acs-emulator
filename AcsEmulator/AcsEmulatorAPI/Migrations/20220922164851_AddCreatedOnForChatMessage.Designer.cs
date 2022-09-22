@@ -3,6 +3,7 @@ using System;
 using AcsEmulatorAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AcsEmulatorAPI.Migrations
 {
     [DbContext(typeof(AcsDbContext))]
-    partial class AcsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220922164851_AddCreatedOnForChatMessage")]
+    partial class AddCreatedOnForChatMessage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.9");
@@ -38,9 +40,6 @@ namespace AcsEmulatorAPI.Migrations
 
                     b.Property<string>("SenderRawId")
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("SequenceId")
-                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Type")
                         .HasColumnType("INTEGER");

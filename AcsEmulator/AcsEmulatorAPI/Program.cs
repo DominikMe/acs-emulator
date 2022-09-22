@@ -71,5 +71,6 @@ app.UseAuthorization();
 
 app.AddIdentity();
 app.AddChatEndpoints();
+app.AddChatThreadEndpoints();
 
 app.Run();
