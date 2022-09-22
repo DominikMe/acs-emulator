@@ -67,7 +67,7 @@ namespace AcsEmulatorAPI
 					{
 						var participants = thisThread.UserChatThreads.Select(uct => new
 						{
-							communicationUserIdentifier = uct.UserId,
+							communicationUserIdentifier = new CommunicationIdentifier(uct.UserId),
 							uct.DisplayName,
 							uct.ShareHistoryTime
 						});
@@ -174,11 +174,7 @@ namespace AcsEmulatorAPI
 										AddParticipantsChatMessage msg => msg.AddedParticipants
 											.Select(p => new
 											{
-												communicationIdentifier = new
-												{
-													rawId = p.Participant.RawId
-												},
-												
+												communicationIdentifier = new CommunicationIdentifier(p.Participant.RawId),												
 												p.DisplayName,
 												p.ShareHistoryTime
 											}),
@@ -195,10 +191,7 @@ namespace AcsEmulatorAPI
 
 								m.CreatedOn,
 
-								senderCommunicationIdentifier = new
-								{
-									rawId = m.Sender.RawId
-								}
+								senderCommunicationIdentifier = new CommunicationIdentifier(m.Sender.RawId)
 							});
 
 						return Results.Ok(new
