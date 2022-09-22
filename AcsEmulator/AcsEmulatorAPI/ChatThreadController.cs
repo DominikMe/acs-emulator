@@ -201,7 +201,11 @@ namespace AcsEmulatorAPI
 								}
 							});
 
-						return Results.Ok(messages);
+						return Results.Ok(new
+						{
+							value = messages
+						});
+
 					}
 					else if (context is ThreadRequestErrorContext err)
 					{
