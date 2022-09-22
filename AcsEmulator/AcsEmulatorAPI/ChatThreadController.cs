@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using System.Reflection.Metadata.Ecma335;
 
 namespace AcsEmulatorAPI
 {
@@ -21,13 +20,7 @@ namespace AcsEmulatorAPI
 				{
 					var context = await GetRequestContext(
 						principal,
-						async (userId) =>
-						{
-							return await db.Users
-								.Include(u => u.Threads)
-								.Include(u => u.UserChatThreads)
-								.FirstOrDefaultAsync(u => u.RawId == userId);
-						},
+						db,
 						async () =>
 						{
 							return await db.ChatThreads
@@ -61,7 +54,7 @@ namespace AcsEmulatorAPI
 				{
 					var context = await GetRequestContext(
 						principal,
-						async (userId) => await db.Users.FindAsync(userId),
+						db,
 						async () =>
 						{
 							return await db.ChatThreads
@@ -98,7 +91,7 @@ namespace AcsEmulatorAPI
 				{
 					var context = await GetRequestContext(
 						principal,
-						async (userId) => await db.Users.FindAsync(userId),
+						db,
 						async () =>
 						{
 							return await db.ChatThreads
@@ -143,7 +136,7 @@ namespace AcsEmulatorAPI
 				{
 					var context = await GetRequestContext(
 						principal,
-						async (userId) => await db.Users.FindAsync(userId),
+						db,
 						async () =>
 						{
 							return await db.ChatThreads
@@ -198,12 +191,12 @@ namespace AcsEmulatorAPI
 
 		private static async Task<ThreadRequestContext> GetRequestContext(
 			ClaimsPrincipal principal,
-			Func<string, Task<User?>> getUser,
+			AcsDbContext db,
 			Func<Task<ChatThread?>> getThread)
 		{
 			string userRawId = principal.Claims.First(x => x.Type == "skypeid").Value;
 			
-			var thisUser = await getUser(userRawId);
+			var thisUser = await db.Users.FindAsync(userRawId);
 			var thisThread = await getThread();
 
 			if (thisThread == null)
