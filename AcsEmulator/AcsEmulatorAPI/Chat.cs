@@ -23,7 +23,16 @@ namespace AcsEmulatorAPI
 
 				var t = ChatThread.CreateNew(req.Topic, user);
 
-				await t.AddParticipants(db, req.Participants);
+				var participants = req.Participants ?? new List<ChatParticipant>();
+
+				// the chat thread creator always gets added as a participant
+				if (!participants.Any(x => x.CommunicationIdentifier.RawId == userRawId))
+				{
+					// todo: handle displayName and shareHistoryTime defaults - just null or default values in db?
+					participants.Add(new ChatParticipant(new CommunicationIdentifier(userRawId), null, null));
+				}
+
+				await t.AddParticipants(db, participants);
 
 				await db.ChatThreads.AddAsync(t);
 				await db.SaveChangesAsync();
