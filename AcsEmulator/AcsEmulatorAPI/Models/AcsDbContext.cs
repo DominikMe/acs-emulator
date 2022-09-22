@@ -18,7 +18,10 @@ namespace AcsEmulatorAPI.Models
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.Entity<ChatThread>()
+            builder.Entity<ChatMessage>().ToTable("ChatMessages");
+			builder.Entity<AddParticipantsChatMessage>().ToTable("AddParticipantsChatMessages");
+
+			builder.Entity<ChatThread>()
                 .HasOne(t => t.CreatedBy)
                 .WithMany();
 
