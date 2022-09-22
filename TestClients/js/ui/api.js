@@ -1,7 +1,7 @@
 async function createUser()
 {
     const response = await fetch("https://localhost/identities", {
-        method: 'POST',
+        method: "post",
         body: JSON.stringify({
             createTokenWithScopes: ["chat"]
         }),
@@ -12,10 +12,16 @@ async function createUser()
     return await response.json();
 }
 
+async function getUsers()
+{
+    const response = await fetch("https://localhost/identities");
+    return await response.json();
+}
+
 async function createChatThread(token, topic)
 {
     const response = await fetch("https://localhost/chat/threads", {
-        method: 'POST',
+        method: "post",
         body: JSON.stringify({
             topic
         }),
@@ -26,4 +32,15 @@ async function createChatThread(token, topic)
         }
     });
     return response.json();
+}
+
+async function getChatThreads(token)
+{
+    const response = await fetch("https://localhost/chat/threads", {
+        withCredentials: true,
+        headers: {
+            "authorization": `Bearer ${token}`
+        }
+    });
+    return await response.json();
 }

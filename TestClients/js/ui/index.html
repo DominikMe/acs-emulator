@@ -2,15 +2,31 @@
     <head>
         <title>Azure Communication Services Chat</title>
         <meta charset="utf-8">
+        <link rel="stylesheet" href="client.css">
     </head>
     <body>
         <script src="https://github.com/Azure/communication-ui-library/releases/latest/download/chatComposite.js"></script>
-        <script src="client.js"></script>
+        <script src="api.js"></script>
+        <script src="ui.js"></script>
+        <div id="config">
+            <div id="users">
+                <select id="select-users"></select>
+                <button id="btn-newUser">+ New user</button>
+            </div>
+            <div id="chatThreads">
+                <select id="select-chatThreads"></select>
+                <input id="input-topic" type="text" placeholder="Topic"></input>
+                <button id="btn-newChatThread">+ New chat thread</button>
+            </div>
+        </div>
         <div id="chat-container" style="height: 500px"></div>
         <script type="module">
-            // todo: UI to create user, create chat thread, add participants, generate or set displayname
-
             const { identity, accessToken } = await createUser();
+            currentToken = accessToken.token;
+
+            // todo: UI to create user, create chat thread, add participants, generate or set displayname
+            initUi();
+            
             const {chatThread } = await createChatThread(accessToken.token, "The weather forecast 😶‍🌫️");
 
             const chatAdapter = await chatComposite.loadChatComposite({
