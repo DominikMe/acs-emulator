@@ -110,12 +110,14 @@ namespace AcsEmulatorAPI
 
 					if (context is ThreadRequestValidContext(User thisUser, ChatThread thisThread))
 					{
+						int nextSequenceId = thisThread.Messages.Count + 1;
 						var msg = new ChatMessage
 						{
 							Content = req.Content,
 							Sender = thisUser,
 							SenderDisplayName = req.SenderDisplayName,
-							Type = req.Type ?? ChatMessageType.Text
+							Type = req.Type ?? ChatMessageType.Text,
+							SequenceId = nextSequenceId
 						};
 						thisThread.Messages.Add(msg);
 
@@ -160,8 +162,7 @@ namespace AcsEmulatorAPI
 								// TODO: convert enum properly
 								type = "text",
 
-								// TODO
-								sequenceId = "1",
+								sequenceId = m.SequenceId.ToString(),
 
 								// TODO
 								versionId = "1",

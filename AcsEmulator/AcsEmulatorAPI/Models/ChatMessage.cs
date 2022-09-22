@@ -16,5 +16,7 @@ namespace AcsEmulatorAPI.Models
 		public string? SenderDisplayName { get; set; }
 
 		public DateTimeOffset CreatedOn { get; set; } = DateTimeOffset.UtcNow;
+
+		public int SequenceId { get; set; }
 	}
 }
