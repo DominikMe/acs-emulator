@@ -161,14 +161,14 @@ namespace AcsEmulatorAPI
 						.Include(t => t.Messages)
 						.FirstOrDefaultAsync(t => t.Id == chatThreadId);
 
-					var user = await db.Users.FindAsync(userRawId);
+					var thisUser = await db.Users.FindAsync(userRawId);
 
 					if (thisThread == null)
 					{
 						return Results.NotFound();
 					}
 
-					if (user == null)
+					if (thisUser == null)
 					{
 						return Results.Forbid();
 					}
@@ -182,6 +182,7 @@ namespace AcsEmulatorAPI
 					var msg = new ChatMessage
 					{
 						Content = req.Content,
+						Sender = thisUser,
 						SenderDisplayName = req.SenderDisplayName,
 						Type = req.Type ?? ChatMessageType.Text
 					};
