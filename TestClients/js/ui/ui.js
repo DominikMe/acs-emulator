@@ -1,6 +1,7 @@
 // todo: fetch and set token when selecting a different user
 let currentToken;
 let currentUser;
+let currentThreadId;
 let chatAdapter;
 
 async function initUi() {
@@ -8,18 +9,18 @@ async function initUi() {
     bindNewChatThread();
     bindSelectUser();
     bindSelectChatThread();
-    await renderUsers();
+    bindAddUsers();
+    await renderUsers(document.getElementById("select-users"));
 }
 
-async function renderUsers() {
-    const usersSelect = document.getElementById("select-users");
+async function renderUsers(selectElement) {
     const { value } = await getUsers();
 
     for (const user of value) {
         const option = document.createElement("option");
         option.text = user.id;
         option.value = user.id;
-        usersSelect.appendChild(option);
+        selectElement.appendChild(option);
     }
 }
 
@@ -69,9 +70,13 @@ function bindSelectChatThread() {
     threadSelect.onchange = async () => {
         const threadId = threadSelect.selectedOptions[0].value;
         if (!threadId) return;
+        currentThreadId = threadId;
         threadSelect.disabled = true;
         document.getElementById("btn-newChatThread").disabled = true;
         document.getElementById("input-topic").disabled = true;
+        document.getElementById("addUsers").style = "visibility: visible";
+        const addUsersSelect =  document.getElementById("select-addUsers");
+        await renderUsers(addUsersSelect);
         chatAdapter = await chatComposite.loadChatComposite({
             displayName: "Emil the Emulator",
             threadId,
@@ -80,6 +85,19 @@ function bindSelectChatThread() {
             token: currentToken
         },
         document.getElementById('chat-container'));
+    }
+}
+
+function bindAddUsers() {
+    const button = document.getElementById("btn-addUsers");
+    button.onclick = async () => {
+        const addUsersSelect =  document.getElementById("select-addUsers");
+        const users = [];
+        for (const option of addUsersSelect.selectedOptions) {
+            users.push(option.value);
+        }
+        if (!users.length) return;
+        await addParticipants(currentToken, currentThreadId, users);
     }
 }
 
