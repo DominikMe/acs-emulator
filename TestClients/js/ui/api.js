@@ -58,3 +58,25 @@ async function getChatThreads(token)
     });
     return await response.json();
 }
+
+async function addParticipants(token, threadId, participantIds)
+{
+    const participants = [];
+    for (const p of participantIds) {
+        participants.push({
+            communicationIdentifier: {
+                rawId: p
+            }
+        })
+    };
+    const response = await fetch(`https://localhost/chat/threads/${threadId}/participants/:add`, {
+        method: "post",
+        body: JSON.stringify({participants}),
+        withCredentials: true,
+        headers: {
+            "authorization": `Bearer ${token}`,
+            "content-type": "application/json"
+        }
+    });
+    return await response.json();
+}
