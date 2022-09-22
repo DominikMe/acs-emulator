@@ -29,9 +29,9 @@ namespace AcsEmulatorAPI
 								.FirstOrDefaultAsync(t => t.Id == chatThreadId);
 						});
 
-					if (context is ThreadRequestValidContext (_, ChatThread thisThread))
+					if (context is ThreadRequestValidContext (User thisUser, ChatThread thisThread))
 					{
-						await thisThread.AddParticipants(db, req.Participants);
+						await thisThread.AddParticipants(db, thisUser, req.Participants);
 
 						await db.SaveChangesAsync();
 
@@ -152,18 +152,43 @@ namespace AcsEmulatorAPI
 							{
 								m.Id,
 
-								// TODO: convert enum properly
-								type = "text",
+								// TODO: how to Enum.ToString() camelCase instead of PascalCase?
+								type = m.Type switch
+								{
+									ChatMessageType.Text => "text",
+									ChatMessageType.ParticipantAdded => "participantAdded",
+									_ => "text"
+								},
 
 								sequenceId = m.SequenceId.ToString(),
 
 								// TODO
 								versionId = "1",
 
-								// TODO: support other message types (topic updated, participants updated)
 								content = new
 								{
-									message = m.Content
+									message = m.Content,
+
+									participants = m switch
+									{
+										AddParticipantsChatMessage msg => msg.AddedParticipants
+											.Select(p => new
+											{
+												communicationIdentifier = new
+												{
+													rawId = p.Participant.RawId
+												},
+												
+												p.DisplayName,
+												p.ShareHistoryTime
+											}),
+
+										// TODO: support participants removed
+										_ => null
+									}
+
+									// TODO: support "topic updated"
+									// topic = msg.Topic
 								},
 
 								m.SenderDisplayName,

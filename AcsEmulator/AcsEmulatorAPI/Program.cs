@@ -7,8 +7,9 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("EmulatorDb");
-builder.Services.AddDbContext<AcsDbContext>(options =>
-	options.UseSqlite(connectionString));
+builder.Services.AddDbContext<AcsDbContext>(options => options
+	.UseLazyLoadingProxies()
+	.UseSqlite(connectionString));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 	.AddJwtBearer(o => o.TokenValidationParameters = UserToken.GetTokenValidationParameters(builder.Configuration["JwtSigningKey"]));

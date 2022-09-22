@@ -32,7 +32,7 @@ namespace AcsEmulatorAPI
 					participants.Add(new ChatParticipant(new CommunicationIdentifier(userRawId), null, null));
 				}
 
-				await t.AddParticipants(db, participants);
+				await t.AddParticipants(db, user, participants);
 
 				await db.ChatThreads.AddAsync(t);
 				await db.SaveChangesAsync();
