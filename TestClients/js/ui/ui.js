@@ -81,7 +81,7 @@ function bindSelectChatThread() {
         chatAdapter = await chatComposite.loadChatComposite({
             displayName: "Emil the Emulator",
             threadId,
-            userId: currentUser,
+            userId: { communicationUserId: currentUser },
             endpoint: "https://localhost/",
             token: currentToken
         },
