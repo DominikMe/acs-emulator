@@ -93,7 +93,10 @@ function bindSelectChatThread() {
 function startPolling(chatAdapter) {
     messagePoller = setInterval(async () => {
         console.log("poll messages");
-        await chatAdapter.fetchInitialData(); // doesn't work and neither does loadPreviousMessages ?
+        const chatThreadClient = chatAdapter.chatClient.getChatThreadClient(currentThreadId);
+        for await (const _message of chatThreadClient.listMessages()) {
+            ;
+        }
     }, 2000);
 }
 
