@@ -148,6 +148,116 @@ namespace AcsEmulatorAPI
 					// TODO: paging
 					return Results.Ok(new { value = participants });
 				});
+
+			app.MapPost(
+				"/chat/threads/{chatThreadId}/messages",
+				[Authorize] async (ClaimsPrincipal principal, AcsDbContext db, string chatThreadId, SendChatMessageRequest req) =>
+				{
+					string userRawId = principal.Claims.First(x => x.Type == "skypeid").Value;
+
+					var thisThread = await db.ChatThreads
+						.Include(t => t.Participants)
+						.Include(t => t.UserChatThreads)
+						.Include(t => t.Messages)
+						.FirstOrDefaultAsync(t => t.Id == chatThreadId);
+
+					var thisUser = await db.Users.FindAsync(userRawId);
+
+					if (thisThread == null)
+					{
+						return Results.NotFound();
+					}
+
+					if (thisUser == null)
+					{
+						return Results.Forbid();
+					}
+
+					// Current user is not a participant in the requested thread
+					if (!thisThread.Participants.Any(p => p.RawId == userRawId))
+					{
+						return Results.Forbid();
+					}
+
+					var msg = new ChatMessage
+					{
+						Content = req.Content,
+						Sender = thisUser,
+						SenderDisplayName = req.SenderDisplayName,
+						Type = req.Type ?? ChatMessageType.Text
+					};
+					thisThread.Messages.Add(msg);
+
+					await db.SaveChangesAsync();
+
+					return Results.Created(
+						$"/chat/threads/{chatThreadId}/messages/{msg.Id}",
+						new { msg.Id });
+				});
+
+			app.MapGet(
+				"/chat/threads/{chatThreadId}/messages",
+				[Authorize] async (ClaimsPrincipal principal, AcsDbContext db, string chatThreadId) =>
+				{
+					string userRawId = principal.Claims.First(x => x.Type == "skypeid").Value;
+
+					var thisThread = await db.ChatThreads
+						.Include(t => t.Participants)
+						.Include(t => t.Messages)
+						.FirstOrDefaultAsync(t => t.Id == chatThreadId);
+
+					var thisUser = await db.Users.FindAsync(userRawId);
+
+					if (thisThread == null)
+					{
+						return Results.NotFound();
+					}
+
+					if (thisUser == null)
+					{
+						return Results.Forbid();
+					}
+
+					// Current user is not a participant in the requested thread
+					if (!thisThread.Participants.Any(p => p.RawId == userRawId))
+					{
+						return Results.Forbid();
+					}
+
+					var messages = thisThread.Messages
+						.Select(m => new
+						{
+							m.Id,
+							
+							// TODO: convert enum properly
+							type = "text",
+
+							// TODO
+							sequenceId = "1",
+
+							// TODO
+							versionId = "1",
+
+							// TODO: support other message types (topic updated, participants updated)
+							content = new
+							{
+								message = m.Content
+							},
+
+							m.SenderDisplayName,
+
+							// TODO: save with message
+							createdOn = DateTimeOffset.UtcNow,
+
+							senderCommunicationIdentifier = new
+							{
+								rawId = m.Sender.RawId
+							}
+						});
+
+					return Results.Ok(messages);
+				});
+
 		}
 	}
 }

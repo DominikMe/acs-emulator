@@ -3,6 +3,7 @@ using System;
 using AcsEmulatorAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AcsEmulatorAPI.Migrations
 {
     [DbContext(typeof(AcsDbContext))]
-    partial class AcsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220922130122_AddChatMessage")]
+    partial class AddChatMessage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.9");
@@ -33,9 +35,6 @@ namespace AcsEmulatorAPI.Migrations
                     b.Property<string>("SenderDisplayName")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("SenderRawId")
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("Type")
                         .HasColumnType("INTEGER");
 
@@ -43,9 +42,7 @@ namespace AcsEmulatorAPI.Migrations
 
                     b.HasIndex("ChatThreadId");
 
-                    b.HasIndex("SenderRawId");
-
-                    b.ToTable("ChatMessages");
+                    b.ToTable("ChatMessage");
                 });
 
             modelBuilder.Entity("AcsEmulatorAPI.Models.ChatThread", b =>
@@ -106,12 +103,6 @@ namespace AcsEmulatorAPI.Migrations
                     b.HasOne("AcsEmulatorAPI.Models.ChatThread", null)
                         .WithMany("Messages")
                         .HasForeignKey("ChatThreadId");
-
-                    b.HasOne("AcsEmulatorAPI.Models.User", "Sender")
-                        .WithMany()
-                        .HasForeignKey("SenderRawId");
-
-                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("AcsEmulatorAPI.Models.ChatThread", b =>
