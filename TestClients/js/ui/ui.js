@@ -3,6 +3,7 @@ let currentToken;
 let currentUser;
 let currentThreadId;
 let chatAdapter;
+let messagePoller;
 
 async function initUi() {
     bindNewUser();
@@ -85,7 +86,18 @@ function bindSelectChatThread() {
             token: currentToken
         },
         document.getElementById('chat-container'));
+        startPolling(chatAdapter);
     }
+}
+
+function startPolling(chatAdapter) {
+    messagePoller = setInterval(async () => {
+        console.log("poll messages");
+        const chatThreadClient = chatAdapter.chatClient.getChatThreadClient(currentThreadId);
+        for await (const _message of chatThreadClient.listMessages()) {
+            ;
+        }
+    }, 2000);
 }
 
 function bindAddUsers() {
