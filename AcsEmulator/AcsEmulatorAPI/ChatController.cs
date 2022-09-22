@@ -59,7 +59,8 @@ namespace AcsEmulatorAPI
 				string userRawId = principal.Claims.First(x => x.Type == "skypeid").Value;
 
 				var threads = await db.ChatThreads
-					.Include(t => t.Participants.Where(p => p.RawId == userRawId))
+					.Include(t => t.Participants)
+					.Where(t => t.Participants.Any(p => p.RawId == userRawId))
 					.Select(t => new { t.Id, t.Topic })
 					.ToListAsync();
 
