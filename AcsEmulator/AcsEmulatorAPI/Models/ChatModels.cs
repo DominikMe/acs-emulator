@@ -1,6 +1,16 @@
 ﻿namespace AcsEmulatorAPI.Models
 {
-	public record CommunicationIdentifier(string RawId);
+	public class CommunicationIdentifier
+	{
+		public CommunicationIdentifier(string rawId) => RawId = rawId;
+
+		public string RawId { get; set; }
+
+		// todo: support multiple identifier types
+		public CommunicationUser CommunicationUser => new(RawId);
+	}
+
+	public record CommunicationUser(string Id);
 
 	public record ChatParticipant(
 		CommunicationIdentifier CommunicationIdentifier,

@@ -44,10 +44,7 @@ namespace AcsEmulatorAPI
 						t.Id,
 						t.Topic,
 						t.CreatedOn,
-						CreatedByCommunicationIdentifier = new
-						{
-							user.RawId
-						}
+						CreatedByCommunicationIdentifier = new CommunicationIdentifier(user.RawId)
 					}
 				};
 
