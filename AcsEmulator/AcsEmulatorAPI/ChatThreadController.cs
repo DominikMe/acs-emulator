@@ -174,8 +174,7 @@ namespace AcsEmulatorAPI
 
 								m.SenderDisplayName,
 
-								// TODO: save with message
-								createdOn = DateTimeOffset.UtcNow,
+								m.CreatedOn,
 
 								senderCommunicationIdentifier = new
 								{
