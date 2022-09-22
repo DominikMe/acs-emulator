@@ -1,8 +1,6 @@
 ﻿#nullable disable
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Reflection;
 
 namespace AcsEmulatorAPI.Models
 {

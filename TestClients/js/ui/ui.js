@@ -56,7 +56,7 @@ function bindNewChatThread() {
     const input = document.getElementById("input-topic");
     button.onclick = async () => {
         const { chatThread } = await createChatThread(currentToken, input.value);
-        const usersSelect = document.getElementById("select-chatThreads");
+        const usersSelect = document.getElementById("select-chatThread");
         const option = document.createElement("option");
         option.text = chatThread.id;
         option.value = chatThread.id;
