@@ -10,34 +10,23 @@
         <script src="ui.js"></script>
         <div id="config">
             <div id="users">
-                <select id="select-users"></select>
+                <select id="select-users">
+                    <option value="">Select a user</option>
+                </select>
                 <button id="btn-newUser">+ New user</button>
             </div>
-            <div id="chatThreads">
-                <select id="select-chatThreads"></select>
+            <div id="chatThreads" style="visibility: hidden;">
+                <select id="select-chatThread">
+                    <option value="">Select a chat thread</option>
+                </select>
                 <input id="input-topic" type="text" placeholder="Topic"></input>
                 <button id="btn-newChatThread">+ New chat thread</button>
             </div>
         </div>
         <div id="chat-container" style="height: 500px"></div>
         <script type="module">
-            const { identity, accessToken } = await createUser();
-            currentToken = accessToken.token;
-
-            // todo: UI to create user, create chat thread, add participants, generate or set displayname
+            // todo: add participants, generate or set displayname
             initUi();
-            
-            const {chatThread } = await createChatThread(accessToken.token, "The weather forecast 😶‍🌫️");
-
-            const chatAdapter = await chatComposite.loadChatComposite({
-                displayName: "Emil the Emulator",
-                threadId: chatThread.id,
-                userId: identity.id,
-                endpoint: "https://localhost/",
-                token: accessToken.token
-            },
-            document.getElementById('chat-container')
-        );
         </script>
     </body>
 </html>
