@@ -66,6 +66,31 @@ namespace AcsEmulatorAPI
 					value = threads
 				});
 			});
+
+			app.MapGet("/chat/threads/{chatThreadId}", [Authorize] async (ClaimsPrincipal principal, AcsDbContext db, string chatThreadId) =>
+			{
+				string userRawId = principal.Claims.First(x => x.Type == "skypeid").Value;
+
+				var thread = await db.ChatThreads.FindAsync(chatThreadId);
+
+				if (thread == null)
+				{
+					return Results.NotFound();
+				}
+
+				if (!thread.Participants.Any(p => p.RawId == userRawId))
+				{
+					return Results.Forbid();
+				}
+
+				return Results.Ok(new
+				{
+					thread.Id,
+					thread.Topic,
+					thread.CreatedOn,
+					createdByCommunicationIdentifier = new CommunicationIdentifier(thread.CreatedBy.RawId)
+				});
+			});
 		}
 	}
 }
