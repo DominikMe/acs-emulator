@@ -50,6 +50,12 @@ namespace AcsEmulatorAPI.Models
 					continue;
 				}
 
+				// Adding an existing participant again is a noop in the real chat service
+				if (Participants.Contains(participantToAdd))
+				{
+					continue;
+				}
+
 				var uct = new UserChatThread
 				{
 					User = participantToAdd,
