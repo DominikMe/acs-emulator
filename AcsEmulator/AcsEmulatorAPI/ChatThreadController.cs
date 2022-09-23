@@ -174,7 +174,7 @@ namespace AcsEmulatorAPI
 										AddParticipantsChatMessage msg => msg.AddedParticipants
 											.Select(p => new
 											{
-												communicationIdentifier = new CommunicationIdentifier(p.Participant.RawId),												
+												communicationIdentifier = new CommunicationIdentifier(p.Participant.RawId),
 												p.DisplayName,
 												p.ShareHistoryTime
 											}),
