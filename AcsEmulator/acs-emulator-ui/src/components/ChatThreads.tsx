@@ -54,8 +54,8 @@ export const ChatThreads = () => {
       key: 'id',
       name: 'Id',
       fieldName: 'id',
-      minWidth: 200,
-      maxWidth: 200,
+      minWidth: 250,
+      maxWidth: 250,
       data: 'string'
     },
     {
