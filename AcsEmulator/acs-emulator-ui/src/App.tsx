@@ -1,12 +1,17 @@
 import { Header } from './components/Header';
+import { LeftNav } from './components/LeftNav';
+import { Stack } from '@fluentui/react';
 
 const App = () => {
   return (
     <>
-      <Header/>
-      <div>
-        HELLO EMULATOR WORLD
-      </div>
+      <Header />
+      <Stack horizontal>
+        <LeftNav />
+        <div>
+          HELLO EMULATOR WORLD
+        </div>
+      </Stack>
     </>
   );
 }
