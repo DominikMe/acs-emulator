@@ -91,6 +91,30 @@ namespace AcsEmulatorAPI
 					createdByCommunicationIdentifier = new CommunicationIdentifier(thread.CreatedBy.RawId)
 				});
 			});
+
+			// "Admin" API for the Emulator UI to be able to display all threads in the system, no matter which user created them.
+			// Real ACS backend doesn't have this API.
+			app.MapGet("/admin/chat/threads", async (AcsDbContext db) =>
+			{
+				var threads = await db.ChatThreads
+					.Select(t => new
+						{
+							t.Id,
+							t.Topic,
+							t.CreatedOn,
+							CreatedBy = new
+							{
+								Kind = "communicationUser",
+								CommunicationUserId = t.CreatedBy.RawId
+							}
+						})
+					.ToListAsync();
+
+				return Results.Ok(new
+				{
+					value = threads,
+				});
+			});
 		}
 	}
 }

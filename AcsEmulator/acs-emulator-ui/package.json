@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@azure/communication-chat": "^1.2.1",
     "@azure/communication-common": "^2.1.0",
     "@fluentui/react": "^8.96.1",
     "@testing-library/jest-dom": "^5.16.5",

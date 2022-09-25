@@ -5,11 +5,9 @@ import {
   CommandBar,
   ICommandBarItemProps,
   IColumn,
-  buildColumns,
   ShimmeredDetailsList,
   SelectionMode
 } from '@fluentui/react';
-import { useConst } from '@fluentui/react-hooks'
 import { CommunicationUserIdentifier } from '@azure/communication-common';
 import { getAll as getAllIdentities } from '../services/identity';
 
@@ -51,26 +49,17 @@ export const Identities = () => {
     },
   ];
 
-  const columns: IColumn[] = useConst(() => {
-    const ids: CommunicationUserIdentifier[] = [
-      {
-        communicationUserId: 'sampleid'
-      }
-    ]
-
-    const cols = buildColumns(ids);
-    for (const c of cols)
+  const columns: IColumn[] = [
     {
-      if (c.key === 'communicationUserId') {
-        c.name = 'Id';
-        c.minWidth = 500;
-        c.maxWidth = 500;
-      }
+      key: 'id',
+      name: 'Id',
+      fieldName: 'communicationUserId',
+      minWidth: 500,
+      maxWidth: 500,
+      data: 'string'
     }
-
-    return cols;
-  });
-
+  ];
+  
   return (
     <Stack tokens={stackTokens}>
       <CommandBar items={commands}/>
