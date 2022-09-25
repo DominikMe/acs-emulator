@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "ACS Emulator",
+  "name": "Azure Communication Services Emulator UI",
   "icons": [
     {
       "src": "favicon.ico",

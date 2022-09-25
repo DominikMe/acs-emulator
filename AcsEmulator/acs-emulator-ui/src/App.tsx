@@ -1,25 +1,22 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { Header } from './components/Header';
+import { LeftNav } from './components/LeftNav';
+import { Route, Routes } from 'react-router-dom';
+import { Stack } from '@fluentui/react';
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Header />
+      <Stack horizontal>
+        <LeftNav />
+        <Routes>
+          <Route index={true} element={<div>quickstart</div>}/>
+          <Route path='/IdentitiesUI' element={<div>identities</div>}/>
+          <Route path='/ChatsUI' element={<div>chats</div>}/>
+          <Route path='/SMSUI' element={<div>sms</div>}/>
+        </Routes>
+      </Stack>
+    </>
   );
 }
 
