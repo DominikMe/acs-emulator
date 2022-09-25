@@ -1,4 +1,5 @@
 import { Nav, INavStyles, INavLinkGroup } from '@fluentui/react';
+import { useNavigate } from 'react-router-dom';
 
 export const LeftNav = () => {
   const navStyles: Partial<INavStyles> = {
@@ -11,28 +12,34 @@ export const LeftNav = () => {
     },
   };
 
+  const navigate = useNavigate();
+
   const navLinkGroups: INavLinkGroup[] = [
     {
       links: [
         {
           name: 'Quickstart',
           url: '/',
-          icon: 'GiftboxOpen'
+          icon: 'GiftboxOpen',
+          key: 'quickstart'
         },
         {
           name: 'Identities',
-          url: 'http://example.com',
+          url: '/IdentitiesUI',
           icon: 'People',
+          key: 'identities'
         },
         {
           name: 'Chats',
-          url: 'http://msn.com',
+          url: '/ChatsUI',
           icon: 'CannedChat',
+          key: 'chats'
         },
         {
           name: 'SMS',
-          url: 'http://msn.com',
+          url: '/SMSUI',
           icon: 'Message',
+          key: 'sms',
           disabled: true,
         }
       ],
@@ -41,6 +48,12 @@ export const LeftNav = () => {
 
   return (
     <Nav
+      onLinkClick={(event, element) => {
+        event?.preventDefault();
+        if (element) {
+          navigate(element.url);
+        }
+      }}
       styles={navStyles}
       groups={navLinkGroups}
     />
