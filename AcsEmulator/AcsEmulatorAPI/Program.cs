@@ -75,4 +75,6 @@ app.AddChatEndpoints();
 app.AddChatThreadEndpoints();
 app.UseWebSockets();
 
+new Trouter(app);
+
 app.Run();

@@ -1,41 +1,102 @@
-﻿using System.Net.WebSockets;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.WebSockets;
+using System.Text;
+using System.Xml.Linq;
 
 namespace AcsEmulatorAPI
 {
 	public class Trouter
 	{
+		private Dictionary<string, string> _srToSkypeId = new();
+		private Dictionary<string, string> _socketIdToSkypeId = new();
+		private Dictionary<string, List<WebSocket>> _skypeIdToSockets = new();
+
 		public Trouter(WebApplication app)
 		{
-			app.MapGet("/trouter/v4/a", (HttpContext context) =>
-			new {
-				ccid = "Q0du9A4hdNg",
-				id = "wnwabJ7wc06Q0du9A4hdNg",
-				socketio= $"{context.Request.PathBase}/ws",
-				surl = "https://trouter-azsc-uswe-0-b.trouter.skype.com:3443/v4/f/wnwabJ7wc06Q0du9A4hdNg/",
-				url = "https://trouter-azsc-uswe-0-b.trouter.skype.com:8443/v4/f/wnwabJ7wc06Q0du9A4hdNg/",
-				ttl = "585731",
-				healthUrl = "https://go.trouter.skype.com:443/v4/h",
-				curlb = "https://trouter-azsc-uswe-0-b.trouter.skype.com:443",
-				connectparams = new {
-					sr = "OksAAPsgwnwabJ7wc06Q0du9A4hdNlMRzPQpZlCmwGsHpVXscO1rsy1sAn9Ned4hda9KzxgO_f4apN39B4NkRaaa6pGHLp-iirXMEQl67LLZrnVluPo",
-					issuer = "prod-2",
-					sp = "connect",
-					se = "1664546360809",
-					st = "1663960329809",
-					sig = "3uVO50vXZxfQFek9pUr5f2INH6N_tNff-vpCN66c9bs"
-				}
+			// uses x-skypetoken header, not auth header
+			app.MapPost("/v4/a", dynamic ([FromHeader(Name = "x-skypetoken")] string skypeTokenHeader) => {
+				var token = ValidateToken(skypeTokenHeader, app.Configuration["jwtSigningKey"]);
+				if (token is null)
+					return Results.Unauthorized();
+
+				var sessionId = Convert.ToBase64String(Encoding.ASCII.GetBytes(Guid.NewGuid().ToString()));
+				var sr = Convert.ToBase64String(Encoding.ASCII.GetBytes(Guid.NewGuid().ToString()));
+				_srToSkypeId[sr] = token.Claims.First(x => x.Type == "skypeid").Value;
+
+				return new
+				{
+					ccid = "Q0du9A4hdNg",
+					id = sessionId,
+					socketio = $"https://localhost/trouter/",
+					surl = $"https://localhost/trouter/f/{sessionId}/",
+					url = $"https://localhost/trouter/f/{sessionId}/",
+					ttl = "585731",
+					healthUrl = $"https://localhost/trouter/h",
+					curlb = "https://trouter-azsc-uswe-0-b.trouter.skype.com:443",
+					connectparams = new
+					{
+						sr = sr,
+						issuer = "prod-2",
+						sp = "connect",
+						se = DateTimeOffset.UtcNow.AddDays(7).ToUnixTimeSeconds().ToString(),
+						st = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
+						sig = Convert.ToBase64String(Encoding.ASCII.GetBytes(Guid.NewGuid().ToString()))
+					}
+				};
 			});
 
-			app.MapGet("/ws", async (HttpContext context) =>
+			app.MapGet("/socket.io/1", (HttpRequest request, HttpResponse response, string sr) => {
+				var skypeId = _srToSkypeId[sr];
+				var socketId = Guid.NewGuid().ToString();
+				_socketIdToSkypeId[socketId] = skypeId;
+				response.Headers["Access-Control-Allow-Origin"] = request.Headers["origin"];
+				return $"{socketId}:70:70:websocket,xhr-polling,jsonp-polling";
+			});
+
+			app.MapGet("/socket.io/1/websocket/{socketId}", async (HttpContext context, string socketId) =>
 			{
 				if (!context.WebSockets.IsWebSocketRequest)
 					return Results.BadRequest();
 
 				using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+
+				var skypeId = _socketIdToSkypeId[socketId];
+				if (_skypeIdToSockets.TryGetValue(skypeId, out var sockets))
+				{
+					sockets.Add(webSocket);					
+				}
+				else
+				{
+					_skypeIdToSockets[skypeId] = new List<WebSocket> { webSocket };
+				}
+
 				await Echo(webSocket);
 
 				return Results.Ok();
 			});
+
+			app.MapGet("/trouter/h", () => Results.Ok());
+
+			app.MapGet("/trouter/f/{sessionId}", () => Results.Ok());
+		}
+
+		private JwtSecurityToken? ValidateToken(string token, string jwtSigningKey)
+		{
+			if (string.IsNullOrEmpty(token))
+				return null;
+
+			var tokenHandler = new JwtSecurityTokenHandler();
+			try
+			{
+				tokenHandler.ValidateToken(token, UserToken.GetTokenValidationParameters(jwtSigningKey), out SecurityToken validatedToken);
+				return (JwtSecurityToken)validatedToken;
+			}
+			catch
+			{
+				return null;
+			}
 		}
 
 		private static async Task Echo(WebSocket webSocket)
