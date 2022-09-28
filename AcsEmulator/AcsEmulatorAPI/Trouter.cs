@@ -108,7 +108,7 @@ namespace AcsEmulatorAPI
 								groupId = threadId,
 								messageId = message.Id,
 								collapseId = NewRandomBase64(),
-								messageType = "Text",
+								messageType = message.Type.ToString(),
 								messageBody = message.Content,
 								senderDisplayName = message.SenderDisplayName,
 								clientMessageId = "",
