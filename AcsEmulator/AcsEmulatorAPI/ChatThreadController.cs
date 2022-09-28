@@ -67,7 +67,7 @@ namespace AcsEmulatorAPI
 					{
 						var participants = thisThread.UserChatThreads.Select(uct => new
 						{
-							communicationUserIdentifier = new CommunicationIdentifier(uct.UserId),
+							communicationIdentifier = new CommunicationIdentifier(uct.UserId),
 							uct.DisplayName,
 							uct.ShareHistoryTime
 						});
@@ -115,6 +115,8 @@ namespace AcsEmulatorAPI
 						thisThread.Messages.Add(msg);
 
 						await db.SaveChangesAsync();
+
+						await NotifyChatMessageReceived(app.Services.GetService<Trouter>(), thisThread.Id, msg, thisThread.Participants);
 
 						return Results.Created(
 							$"/chat/threads/{chatThreadId}/messages/{msg.Id}",
@@ -235,6 +237,14 @@ namespace AcsEmulatorAPI
 			}
 
 			return new ThreadRequestValidContext(thisUser, thisThread);
+		}
+
+		private static async Task NotifyChatMessageReceived(Trouter trouter, string threadId, ChatMessage message, IEnumerable<User> participants)
+		{
+			foreach (var participant in participants)
+			{
+				await trouter.SendChatMessageReceived(participant.RawId, threadId, message);
+			}
 		}
 	}
 }
