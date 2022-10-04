@@ -1,5 +1,5 @@
 # Emulator for Azure Communication Services
-Local emulator to run Azure Communication Services client SDKs without a provisioned ACS resource.
+Local emulator to run Azure Communication Services client SDKs without having to provision an Azure Communication Services resource.
 
 ## Getting started
 
@@ -9,11 +9,19 @@ Local emulator to run Azure Communication Services client SDKs without a provisi
 
 * Build and run the `AcsEmulatorApi` project
 
+* You can use the `Try it` feature in the Swagger editor send requests against the API
+
 * Use `"endpoint=https://localhost/;accessKey=pw=="` as your connection string when instantiating Azure Communication Services SDK service clients.
 
 * Use the Identity SDK with the localhost connection string and create users and tokens as usual. Use the created token to instantiate the Chat SDK.
 
 * When running the JavaScript SDKs with Node.JS add `NODE_TLS_REJECT_UNAUTHORIZED="0"` as an env variable
+
+* You can also use endpoint `https://localhost/` to run the Live Preview of the UI library's [Chat composite](https://azure.github.io/communication-ui-library/?path=/story/composites-chat-joinexistingchatthread--join-existing-chat-thread). First, create two users with tokens and use one of the users to create a chat thread with the other user. Then, you can open two tabs side by side and fill in the the respective user, token, thread id and endpoint for each.
+
+* You can browse the emulator data by navigating to `acs-emulator-ui`, run `npm install` and `npm run start` and open the localhost web app url that gets printed to the console
+
+* To reset the emulator entirely and clear its data and state, delete the `AcsEmulator.db` file
 
 
 ## Enable real-time notifications for Chat
@@ -44,7 +52,13 @@ The URL for establishing the real-time notification channel, is unfortunately ha
 
 Now, the Chat SDK can establish a real-time notification channel which is backed by a websocket connection in the emulator's ASP .NET Core service.
 
-### Limitations
+## Limitations
 
-* Only `messageReceived` notifications are implemented
-* Typing notifications and others aren't yet implemented
+* Only `/identities` and `/chat` APIs have been implemented so far
+* `/identities` API has no auth and ignores the HMAC signature of the request
+(`chat`)
+* `/chat` APIs are incomplete
+  * token scope `chat` is not enforced
+  * typing notifications not implemented
+  * read receipts not implemented
+  * only `messageReceived` real-time notifications are implemented so far
