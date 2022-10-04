@@ -75,7 +75,8 @@ namespace AcsEmulatorAPI
 				await SendMessage(webSocket, "1::");
 				await SendTrouterConnected(webSocket);
 
-				await Echo(webSocket);
+				await Ack(webSocket);
+				_skypeIdToSockets[skypeId].Remove(webSocket);
 
 				return Results.Ok();
 			}).RequireCors("trouterPolicy");
@@ -157,7 +158,7 @@ namespace AcsEmulatorAPI
 					true,
 					CancellationToken.None);
 
-		private static async Task Echo(WebSocket webSocket)
+		private async Task Ack(WebSocket webSocket)
 		{
 			var buffer = new byte[1024 * 4];
 			var receiveResult = await webSocket.ReceiveAsync(
