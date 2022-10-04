@@ -17,8 +17,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // todo handle acsScope claim
 builder.Services.AddAuthorization();
 
-builder.Services.AddCors(options => 
-	options.AddDefaultPolicy(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
+builder.Services.AddCors(options => {
+	options.AddDefaultPolicy(builder => builder.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
+	options.AddPolicy("trouterPolicy", builder => builder.AllowAnyMethod().AllowAnyHeader().AllowCredentials().SetIsOriginAllowed(_ => true));
+});
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -45,6 +47,8 @@ builder.Services.AddSwaggerGen(options =>
 		}
 	});
 });
+
+builder.Services.AddSingleton(new Trouter());
 
 var app = builder.Build();
 
@@ -73,5 +77,8 @@ app.UseAuthorization();
 app.AddIdentity();
 app.AddChatEndpoints();
 app.AddChatThreadEndpoints();
+app.UseWebSockets();
+
+app.Services.GetService<Trouter>().AddEndpoints(app);
 
 app.Run();
