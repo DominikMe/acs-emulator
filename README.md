@@ -9,7 +9,7 @@ Local emulator to run Azure Communication Services client SDKs without having to
 
 * Build and run the `AcsEmulatorApi` project
 
-* You can use the `Try it` feature in the Swagger editor send requests against the API
+* You can use the `Try it` feature in the Swagger editor to send requests against the API
 
 * Use `"endpoint=https://localhost/;accessKey=pw=="` as your connection string when instantiating Azure Communication Services SDK service clients.
 
@@ -20,6 +20,8 @@ Local emulator to run Azure Communication Services client SDKs without having to
 * You can also use endpoint `https://localhost/` to run the Live Preview of the UI library's [Chat composite](https://azure.github.io/communication-ui-library/?path=/story/composites-chat-joinexistingchatthread--join-existing-chat-thread). First, create two users with tokens and use one of the users to create a chat thread with the other user. Then, you can open two tabs side by side and fill in the the respective user, token, thread id and endpoint for each.
 
 * You can browse the emulator data by navigating to `acs-emulator-ui`, run `npm install` and `npm run start` and open the localhost web app url that gets printed to the console
+
+* For inspecting the DB data directly, we recommend to install [DB Browser for SQLite](https://sqlitebrowser.org/) and use it to open the `AcsEmulator.db` file
 
 * To reset the emulator entirely and clear its data and state, delete the `AcsEmulator.db` file
 
@@ -56,7 +58,6 @@ Now, the Chat SDK can establish a real-time notification channel which is backed
 
 * Only `/identities` and `/chat` APIs have been implemented so far
 * `/identities` API has no auth and ignores the HMAC signature of the request
-(`chat`)
 * `/chat` APIs are incomplete
   * token scope `chat` is not enforced
   * typing notifications not implemented
