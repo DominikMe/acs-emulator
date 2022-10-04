@@ -103,6 +103,7 @@ namespace AcsEmulatorAPI
 
 					if (context is ThreadRequestValidContext(User thisUser, ChatThread thisThread))
 					{
+						// todo: how will this behave when messages get deleted? Should we use the sequence id instead of a guid as message id?
 						int nextSequenceId = thisThread.Messages.Count + 1;
 						var msg = new ChatMessage
 						{
@@ -211,6 +212,38 @@ namespace AcsEmulatorAPI
 						throw new Exception($"Unexpected context type: {context.GetType()}");
 					}
 				});
+
+			app.MapPost(
+				"/chat/threads/{chatThreadId}/typing",
+				[Authorize] async (ClaimsPrincipal principal, AcsDbContext db, string chatThreadId, TypingRequest req) =>
+				{
+					var context = await GetRequestContext(
+						principal,
+						db,
+						async () =>
+						{
+							return await db.ChatThreads
+								.Include(t => t.Participants)
+								.Include(t => t.UserChatThreads)
+								.Include(t => t.Messages)
+								.FirstOrDefaultAsync(t => t.Id == chatThreadId);
+						});
+
+					if (context is ThreadRequestValidContext(User thisUser, ChatThread thisThread))
+					{
+						await NotifyTyping(app.Services.GetService<Trouter>(), thisThread.Id, thisUser.RawId, req.SenderDisplayName, thisThread.Participants, Guid.NewGuid().ToString());
+
+						return Results.Ok();
+					}
+					else if (context is ThreadRequestErrorContext err)
+					{
+						return err.ErrorResult;
+					}
+					else
+					{
+						throw new Exception($"Unexpected context type: {context.GetType()}");
+					}
+				});
 		}
 
 		private static async Task<ThreadRequestContext> GetRequestContext(
@@ -244,6 +277,14 @@ namespace AcsEmulatorAPI
 			foreach (var participant in participants)
 			{
 				await trouter.SendChatMessageReceived(participant.RawId, threadId, message);
+			}
+		}
+
+		private static async Task NotifyTyping(Trouter trouter, string threadId, string senderId, string? senderDisplayName, IEnumerable<User> participants, string messageId)
+		{
+			foreach (var participant in participants)
+			{
+				await trouter.SendTyping(senderId, senderDisplayName, participant.RawId, threadId, messageId);
 			}
 		}
 	}

@@ -115,11 +115,46 @@ namespace AcsEmulatorAPI
 								clientMessageId = "",
 								originalArrivalTime = message.CreatedOn.ToString("o"),
 								priority = "",
-								version = Random.Shared.NextInt64(),
+								version = message.Id, // todo: support message edits
 								acsChatMessageData = new
 								{
 									fileSharingMetadata = new object[] {}
 								}
+							})
+						}
+					));
+				}
+			}
+			Console.WriteLine("Failed to get active websocket for " + receiverRawId);
+		}
+
+		public async Task SendTyping(string senderRawId, string? senderDisplayName, string receiverRawId, string threadId, string messageId)
+		{
+			if (_skypeIdToSockets.TryGetValue(receiverRawId, out var sockets))
+			{
+				foreach (var socket in sockets)
+				{
+					await SendMessage(socket, "3:::" + JsonSerializer.Serialize(
+						new
+						{
+							id = Random.Shared.NextInt64(),
+							method = "POST",
+							url = "/trouter/f/" + NewRandomBase64(),
+							headers = new { },
+							body = JsonSerializer.Serialize(new
+							{
+								eventId = 245,
+								senderId = senderRawId,
+								recipientId = receiverRawId.Split("8:")[1],
+								recipientMri = receiverRawId,
+								transactionId = NewRandomBase64(),
+								groupId = threadId,
+								messageId = messageId,
+								collapseId = NewRandomBase64(),
+								messageType = "Control/Typing",
+								senderDisplayName = senderDisplayName ?? "",
+								originalArrivalTime = DateTimeOffset.UtcNow.ToString("o"),
+								version = messageId
 							})
 						}
 					));
