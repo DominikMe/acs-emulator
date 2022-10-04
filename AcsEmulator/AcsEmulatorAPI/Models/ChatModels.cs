@@ -34,4 +34,6 @@
 		string Content,
 		string? SenderDisplayName,
 		ChatMessageType? Type);
+
+	public record TypingRequest(string? SenderDisplayName);
 }
