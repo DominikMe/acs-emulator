@@ -60,6 +60,5 @@ Now, the Chat SDK can establish a real-time notification channel which is backed
 * `/identities` API has no auth and ignores the HMAC signature of the request
 * `/chat` APIs are incomplete
   * token scope `chat` is not enforced
-  * typing notifications not implemented
   * read receipts not implemented
-  * only `messageReceived` real-time notifications are implemented so far
+  * only `messageReceived` and typing real-time notifications are implemented so far
