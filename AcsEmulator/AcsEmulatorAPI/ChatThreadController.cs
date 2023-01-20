@@ -231,6 +231,7 @@ namespace AcsEmulatorAPI
 
 					if (context is ThreadRequestValidContext(User thisUser, ChatThread thisThread))
 					{
+						// todo displayname
 						await NotifyTyping(app.Services.GetService<Trouter>(), thisThread.Id, thisUser.RawId, req.SenderDisplayName, thisThread.Participants, Guid.NewGuid().ToString());
 
 						return Results.Ok();

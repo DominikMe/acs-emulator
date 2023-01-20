@@ -49,10 +49,13 @@ namespace AcsEmulatorAPI
 			});
 
 			app.MapGet("/socket.io/1", (HttpRequest request, HttpResponse response, string sr) => {
-				var skypeId = _srToSkypeId[sr];
-				var socketId = Guid.NewGuid().ToString();
-				_socketIdToSkypeId[socketId] = skypeId;
-				return $"{socketId}:70:70:websocket";
+				if (_srToSkypeId.TryGetValue(sr, out var skypeId))
+				{
+					var socketId = Guid.NewGuid().ToString();
+					_socketIdToSkypeId[socketId] = skypeId;
+					return Results.Ok($"{socketId}:70:70:websocket");
+				}
+				return Results.Problem();
 			}).RequireCors("trouterPolicy");
 
 			app.MapGet("/socket.io/1/websocket/{socketId}", async (HttpContext context, string socketId) =>
@@ -72,9 +75,7 @@ namespace AcsEmulatorAPI
 					_skypeIdToSockets[skypeId] = new List<WebSocket> { webSocket };
 				}
 
-				await SendMessage(webSocket, "1::");
 				await SendTrouterConnected(webSocket);
-
 				await Ack(webSocket);
 				_skypeIdToSockets[skypeId].Remove(webSocket);
 
@@ -182,6 +183,7 @@ namespace AcsEmulatorAPI
 
 		private static async Task SendTrouterConnected(WebSocket webSocket)
 		{
+			await SendMessage(webSocket, "1::");
 			await SendMessage(webSocket, $"5:1::{JsonSerializer.Serialize(new { name = "trouter.connected", args = new[] { new { ttl = 570883, dur = "260" } } })}");
 			await SendMessage(webSocket, $"5:2::{JsonSerializer.Serialize(new { name = "trouter.message_loss", args = new[] { new { droppedIndicators = new[] { new { tag = "", etag = DateTimeOffset.UtcNow.ToString("o") } } } } })}");
 		}
