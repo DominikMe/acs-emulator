@@ -78,6 +78,8 @@ app.AddIdentity();
 app.AddChatEndpoints();
 app.AddChatThreadEndpoints();
 app.AddSms();
+app.AddCalling();
+app.AddEcs();
 app.UseWebSockets();
 app.MapGroup("").MapEmailsApi();
 

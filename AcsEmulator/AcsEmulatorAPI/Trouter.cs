@@ -229,6 +229,6 @@ namespace AcsEmulatorAPI
 				CancellationToken.None);
 		}
 
-		private string NewRandomBase64() => Convert.ToBase64String(Encoding.ASCII.GetBytes(Guid.NewGuid().ToString()));
+		private static string NewRandomBase64() => Convert.ToBase64String(Encoding.ASCII.GetBytes(Guid.NewGuid().ToString()));
 	}
 }
