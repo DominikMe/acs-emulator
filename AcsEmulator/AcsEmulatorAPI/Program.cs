@@ -79,6 +79,7 @@ app.AddChatEndpoints();
 app.AddChatThreadEndpoints();
 app.AddSms();
 app.UseWebSockets();
+app.MapGroup("").MapEmailsApi();
 
 app.Services.GetService<Trouter>().AddEndpoints(app);
 
