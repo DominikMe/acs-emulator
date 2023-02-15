@@ -78,6 +78,7 @@ app.AddIdentity();
 app.AddChatEndpoints();
 app.AddChatThreadEndpoints();
 app.UseWebSockets();
+app.MapGroup("").MapEmailsApi();
 
 app.Services.GetService<Trouter>().AddEndpoints(app);
 
