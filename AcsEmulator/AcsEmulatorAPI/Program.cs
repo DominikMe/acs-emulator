@@ -77,6 +77,7 @@ app.UseAuthorization();
 app.AddIdentity();
 app.AddChatEndpoints();
 app.AddChatThreadEndpoints();
+app.AddSms();
 app.UseWebSockets();
 
 app.Services.GetService<Trouter>().AddEndpoints(app);
