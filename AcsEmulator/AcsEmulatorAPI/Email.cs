@@ -1,4 +1,6 @@
-﻿namespace AcsEmulatorAPI
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace AcsEmulatorAPI
 {
 	// https://github.com/Azure/azure-rest-api-specs/blob/7148f91d0d78122daa384af5574f992437b7c8be/specification/communication/data-plane/Email/preview/2023-01-15-preview/CommunicationServicesEmail.json
 	public static class Email
@@ -11,27 +13,23 @@
 		}
 
 		// todo: read status from db and write succeeded status back to db
-		private static IResult GetOperation(string operationId, HttpContext http)
+		private static IResult GetOperation(string operationId, HttpContext httpContext)
 		{
 			if (Random.Shared.Next(4) != 0)
 			{
-				http.Response.Headers.Add("retry-after", "2000");
+				httpContext.Response.Headers.Add("retry-after", "2000");
 				return Results.Ok(new OperationStatus(operationId, "Running"));
 			}
 			return Results.Ok(new OperationStatus(operationId, "Succeeded"));
 		}
 
 		// todo: validation, store email in db
-		private static IResult SendEmail(SendEmailRequest emailRequest, HttpContext http)
+		private static IResult SendEmail(SendEmailRequest emailRequest, [FromHeader(Name = "Operation-Id")] string clientOperationId, HttpContext httpContext)
 		{
-			var operationId = Guid.NewGuid().ToString();
-			if (http.Request.Headers.TryGetValue("Operation-Id", out var clientOperationId))
-			{
-				operationId = clientOperationId.ToString();
-			}
-			http.Response.Headers.Add("retry-after", "2000");
-			var location = $"https://{http.Request.Host}/emails/operations/{operationId}";
-			http.Response.Headers.Add("Operation-Location", location);
+			var operationId = clientOperationId ?? Guid.NewGuid().ToString();
+			httpContext.Response.Headers.Add("retry-after", "2000");
+			var location = $"https://{httpContext.Request.Host}/emails/operations/{operationId}";
+			httpContext.Response.Headers.Add("Operation-Location", location);
 			return Results.Accepted(location, new OperationStatus(operationId, "NotStarted"));
 		}
 
