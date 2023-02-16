@@ -13,19 +13,20 @@ namespace AcsEmulatorAPI
 
             app.MapPost("/sms", async (AcsDbContext db, SendMessageRequest req) =>
             {
+                var messagesToAdd = new List<SmsMessage>();
                 foreach (var recipient in req.SmsRecipients)
                 {
                     var msg = SmsMessage.CreateNew(req.From, recipient.To, req.Message);
                     msg.EnableDeliveryReport = req.SmsSendOptions?.EnableDeliveryReport ?? false;
                     msg.Tag = req.SmsSendOptions?.Tag;
 
-                    db.SmsMessages.Add(msg);
+                    messagesToAdd.Add(msg);
                 }
 
+                db.SmsMessages.AddRange(messagesToAdd);
                 await db.SaveChangesAsync();
 
-                // todo: currently always returning all messages (instead of only requested ones)!
-                var messages = db.SmsMessages.Select(m => new
+                var messages = messagesToAdd.Select(m => new
                 {
                     m.To,
                     messageId = m.Id,
