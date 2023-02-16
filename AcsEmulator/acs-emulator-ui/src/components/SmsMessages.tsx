@@ -32,24 +32,12 @@ export const SmsMessages = () => {
   }, [])
 
   const commands: ICommandBarItemProps[] = [
-    // {
-    //   key: 'add',
-    //   text: 'Add (TBD)',
-    //   iconProps: { iconName: 'Add' },
-    //   disabled: true
-    // },
     {
       key: 'refresh',
       text: 'Refresh',
       iconProps: { iconName: 'Refresh' },
       onClick: refreshMessagesClicked
     },
-    // {
-    //   key: 'delete',
-    //   text: 'Delete (TBD)',
-    //   iconProps: { iconName: 'Delete' },
-    //   disabled: true
-    // },
   ];
 
   const columns: IColumn[] = [
