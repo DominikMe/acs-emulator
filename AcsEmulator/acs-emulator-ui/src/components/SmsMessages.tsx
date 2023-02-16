@@ -8,10 +8,10 @@ import {
   ShimmeredDetailsList,
   SelectionMode
 } from '@fluentui/react';
-import { ChatThreadProperties } from '@azure/communication-chat';
+import { SmsMessage, getAll as getAllSmsMessages } from '../services/sms';
 
 export const SmsMessages = () => {
-  const [loadedChatThreads, setLoadedChatThreads] = useState<ChatThreadProperties[] | undefined>(undefined);
+  const [loadedSmsMessages, setLoadedSmsMessages] = useState<SmsMessage[] | undefined>(undefined);
 
   const stackTokens: IStackTokens = {
     childrenGap: 5,
@@ -19,12 +19,12 @@ export const SmsMessages = () => {
   }
 
   const refreshMessagesClicked = (ev?: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>) => {
-    const getChatThreads = async () => {
-      const threads = undefined;//await getAllChatThreads();
-      setLoadedChatThreads(threads);
+    const getSmsMessages = async () => {
+      const threads = await getAllSmsMessages();
+      setLoadedSmsMessages(threads);
     }
     
-    getChatThreads();
+    getSmsMessages();
   }
 
   useEffect(() => {
@@ -57,49 +57,49 @@ export const SmsMessages = () => {
       key: 'id',
       name: 'Id',
       fieldName: 'id',
-      minWidth: 250,
+      minWidth: 150,
+      data: 'string'
+    },
+    {
+      key: 'from',
+      name: 'From',
+      fieldName: 'from',
+      minWidth: 100,
+      data: 'string'
+    },
+    {
+      key: 'to',
+      name: 'To',
+      fieldName: 'to',
+      minWidth: 100,
+      data: 'string'
+    },
+    {
+      key: 'message',
+      name: 'Message',
+      fieldName: 'message',
+      minWidth: 150,
       maxWidth: 250,
       data: 'string'
     },
     {
-      key: 'topic',
-      name: 'Topic',
-      fieldName: 'topic',
-      minWidth: 150,
-      data: 'string'
-    },
-    {
-      key: 'createdOn',
-      name: 'Created On',
-      minWidth: 150,
-      maxWidth: 150,
-      isPadded: true,
-      onRender: (item: ChatThreadProperties) => {
-        return <span>{item.createdOn.toISOString()}</span>
-      }
-    },
-    {
-      key: 'createdBy',
-      name: 'Created By',
-      minWidth: 500,
-      maxWidth: 500,
-      onRender: (item: ChatThreadProperties) => {
-        return item.createdBy?.kind === 'communicationUser' ? <span>{item.createdBy?.communicationUserId}</span> :
-          <span></span>
-      }
+      key: 'enableDeliveryReport',
+      name: 'Report?',
+      fieldName: 'enableDeliveryReport',
+      minWidth: 50,
+      data: 'boolean'
     }
   ];
 
   return (
     <Stack tokens={stackTokens}>
       <CommandBar items={commands}/>
-      <div>MESSAGES GO HERE</div>
-      {/* <ShimmeredDetailsList
-        items={loadedChatThreads || []}
-        enableShimmer={!loadedChatThreads}
+      <ShimmeredDetailsList
+        items={loadedSmsMessages || []}
+        enableShimmer={!loadedSmsMessages}
         columns={columns}
         selectionMode={SelectionMode.none}
-      /> */}
+      />
     </Stack>
   );
 }

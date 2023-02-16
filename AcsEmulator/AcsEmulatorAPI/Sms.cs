@@ -1,4 +1,5 @@
 ﻿using AcsEmulatorAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace AcsEmulatorAPI
 {
@@ -23,6 +24,7 @@ namespace AcsEmulatorAPI
 
                 await db.SaveChangesAsync();
 
+                // todo: currently always returning all messages (instead of only requested ones)!
                 var messages = db.SmsMessages.Select(m => new
                 {
                     m.To,
@@ -32,6 +34,26 @@ namespace AcsEmulatorAPI
                 });
 
                 return Results.Accepted(value: new
+                {
+                    value = messages
+                });
+            });
+
+            // "Admin" API for the Emulator UI to be able to display all "sent" SMS
+            app.MapGet("/admin/sms", async (AcsDbContext db) =>
+            {
+                var messages = await db.SmsMessages
+                    .Select(m => new
+                    {
+                        m.Id,
+                        m.From,
+                        m.To,
+                        m.Message,
+                        m.EnableDeliveryReport,
+                        m.Tag
+                    }).ToListAsync();
+
+                return Results.Ok(new
                 {
                     value = messages
                 });
