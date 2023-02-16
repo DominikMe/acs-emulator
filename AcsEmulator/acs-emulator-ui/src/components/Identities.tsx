@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { 
   Stack,
   IStackTokens,
@@ -28,6 +28,10 @@ export const Identities = () => {
     getIdentities();
   }
 
+  useEffect(() => {
+    refreshIdentitiesClicked();
+  }, [])
+
   const commands: ICommandBarItemProps[] = [
     {
       key: 'add',
@@ -37,7 +41,7 @@ export const Identities = () => {
     },
     {
       key: 'refresh',
-      text: 'Load/Refresh',
+      text: 'Refresh',
       iconProps: { iconName: 'Refresh' },
       onClick: refreshIdentitiesClicked
     },
