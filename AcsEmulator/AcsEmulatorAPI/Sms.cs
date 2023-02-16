@@ -10,43 +10,44 @@ namespace AcsEmulatorAPI
         {
             var resourceId = app.Configuration["ResourceId"];
 
-            app.MapPost("/sms", dynamic (AcsDbContext db, SendMessageRequest req) =>
+            app.MapPost("/sms", async (AcsDbContext db, SendMessageRequest req) =>
             {
+                foreach (var recipient in req.SmsRecipients)
+                {
+                    var msg = SmsMessage.CreateNew(req.From, recipient.To, req.Message);
+                    msg.EnableDeliveryReport = req.SmsSendOptions?.EnableDeliveryReport ?? false;
+                    msg.Tag = req.SmsSendOptions?.Tag;
+
+                    db.SmsMessages.Add(msg);
+                }
+
+                await db.SaveChangesAsync();
+
+                var messages = db.SmsMessages.Select(m => new
+                {
+                    m.To,
+                    messageId = m.Id,
+                    httpStatusCode = 202,
+                    successfull = true
+                });
+
                 return Results.Accepted(value: new
                 {
-                    value = new[]
-                    {
-                        new
-                        {
-                            to = "+11234567890",
-                            messageId = (string?)"Outgoing_20200610203725bfd4ba70-70bf-4f77-925d-c0bdb5161bb3",
-                            httpStatusCode = 202,
-                            errorMessage = (string?)null,
-                            successFull = true
-                        },
-                        new
-                        {
-                            to = "+112345678901",
-                            messageId = (string?)null,
-                            httpStatusCode = 400,
-                            errorMessage = (string?)"Invalid To phone number format.",
-                            successFull = false
-                        }
-                    }
+                    value = messages
                 });
             });
         }
 
         record SendMessageRequest(
             string From,
-            List<SmsRecipient> To,
+            List<SmsRecipient> SmsRecipients,
             string Message,
             SmsSendOptions? SmsSendOptions);
 
         record SmsRecipient(
             string To,
-            string? RepeatabilityRequestId,
-            DateTimeOffset? RepeatabilityFirstSent);
+            string? RepeatabilityRequestId);
+            //DateTimeOffset? RepeatabilityFirstSent); todo: fix date parsing
 
         record SmsSendOptions(bool EnableDeliveryReport, string Tag);
     }

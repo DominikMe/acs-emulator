@@ -10,6 +10,8 @@ namespace AcsEmulatorAPI.Models
 
         public DbSet<ChatThread> ChatThreads { get; set; }
 
+        public DbSet<SmsMessage> SmsMessages { get; set; }
+
         public AcsDbContext(DbContextOptions<AcsDbContext> options)
             : base(options)
         {
