@@ -20,8 +20,8 @@ export const SmsMessages = () => {
 
   const refreshMessagesClicked = (ev?: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>) => {
     const getSmsMessages = async () => {
-      const threads = await getAllSmsMessages();
-      setLoadedSmsMessages(threads);
+      const messages = await getAllSmsMessages();
+      setLoadedSmsMessages(messages);
     }
     
     getSmsMessages();
