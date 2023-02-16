@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { 
   Stack,
   IStackTokens,
@@ -28,6 +28,10 @@ export const ChatThreads = () => {
     getChatThreads();
   }
 
+  useEffect(() => {
+    refreshChatThreadsClicked();
+  }, [])
+
   const commands: ICommandBarItemProps[] = [
     {
       key: 'add',
@@ -37,7 +41,7 @@ export const ChatThreads = () => {
     },
     {
       key: 'refresh',
-      text: 'Load/Refresh',
+      text: 'Refresh',
       iconProps: { iconName: 'Refresh' },
       onClick: refreshChatThreadsClicked
     },
