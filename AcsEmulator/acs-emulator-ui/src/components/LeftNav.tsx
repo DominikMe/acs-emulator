@@ -39,8 +39,7 @@ export const LeftNav = () => {
           name: 'SMS',
           url: '/SMSUI',
           icon: 'Message',
-          key: 'sms',
-          disabled: true,
+          key: 'sms'
         }
       ],
     },

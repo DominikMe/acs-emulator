@@ -12,18 +12,20 @@ namespace AcsEmulatorAPI
 
             app.MapPost("/sms", async (AcsDbContext db, SendMessageRequest req) =>
             {
+                var messagesToAdd = new List<SmsMessage>();
                 foreach (var recipient in req.SmsRecipients)
                 {
                     var msg = SmsMessage.CreateNew(req.From, recipient.To, req.Message);
                     msg.EnableDeliveryReport = req.SmsSendOptions?.EnableDeliveryReport ?? false;
                     msg.Tag = req.SmsSendOptions?.Tag;
 
-                    db.SmsMessages.Add(msg);
+                    messagesToAdd.Add(msg);
                 }
 
+                db.SmsMessages.AddRange(messagesToAdd);
                 await db.SaveChangesAsync();
 
-                var messages = db.SmsMessages.Select(m => new
+                var messages = messagesToAdd.Select(m => new
                 {
                     m.To,
                     messageId = m.Id,
@@ -34,6 +36,15 @@ namespace AcsEmulatorAPI
                 return Results.Accepted(value: new
                 {
                     value = messages
+                });
+            });
+
+            // "Admin" API for the Emulator UI to be able to display all "sent" SMS
+            app.MapGet("/admin/sms", (AcsDbContext db) =>
+            {
+                return Results.Ok(new
+                {
+                    value = db.SmsMessages
                 });
             });
         }
