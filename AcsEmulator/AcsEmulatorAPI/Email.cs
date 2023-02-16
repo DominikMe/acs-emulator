@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AcsEmulatorAPI.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AcsEmulatorAPI
 {
@@ -8,7 +9,15 @@ namespace AcsEmulatorAPI
 		public static RouteGroupBuilder MapEmailsApi(this RouteGroupBuilder group)
 		{
 			group.MapGet("/emails/operations/{operationId}", GetOperation);
-			group.MapPost("/emails:send", SendEmail);
+			group.MapPost("/emails:send", SendEmailAsync);
+
+			// "Admin" API for the Emulator UI to be able to display all "sent" Emails
+			group.MapGet("/admin/emails", (AcsDbContext db) => Results.Ok(new
+			{
+				// todo: we're sending down the DB schema because we're lazy. A proper /emails collection would use the API schema
+				value = db.EmailMessages
+			}));
+
 			return group;
 		}
 
@@ -24,25 +33,29 @@ namespace AcsEmulatorAPI
 		}
 
 		// todo: validation, store email in db
-		private static IResult SendEmail(SendEmailRequest emailRequest, [FromHeader(Name = "Operation-Id")] string clientOperationId, HttpContext httpContext)
+		private static async Task<IResult> SendEmailAsync(AcsDbContext db, SendEmailRequest emailRequest, [FromHeader(Name = "Operation-Id")] string? clientOperationId, HttpContext httpContext)
 		{
 			var operationId = clientOperationId ?? Guid.NewGuid().ToString();
 			httpContext.Response.Headers.Add("retry-after", "2000");
 			var location = $"https://{httpContext.Request.Host}/emails/operations/{operationId}";
 			httpContext.Response.Headers.Add("Operation-Location", location);
+
+			db.EmailMessages.Add(EmailMessage.FromApiModel(emailRequest, operationId));
+			await db.SaveChangesAsync();
+
 			return Results.Accepted(location, new OperationStatus(operationId, "NotStarted"));
 		}
 
-		record OperationStatus(string id, string status);
+		internal record OperationStatus(string id, string status);
 
-		record SendEmailRequest(Dictionary<string, string> headers, string senderEmail, EmailContent content, EmailRecipients recipients, EmailAttachment[] attachments, EmailRecipient[] replyTo, bool disableUserEngagementTracking = true);
+		internal record SendEmailRequest(Dictionary<string, string> headers, string senderEmail, EmailContent content, EmailRecipients recipients, EmailAttachment[] attachments, EmailRecipient[] replyTo, bool disableUserEngagementTracking = true);
 
-		record EmailContent(string subject, string plainText, string html);
+		internal record EmailContent(string subject, string plainText, string html);
 
-		record EmailRecipients(EmailRecipient[] to, EmailRecipient[] cc, EmailRecipient[] bcc);
+		internal record EmailRecipients(EmailRecipient[] to, EmailRecipient[] cc, EmailRecipient[] bcc);
 
-		record EmailRecipient(string email, string displayName);
+		internal record EmailRecipient(string email, string displayName);
 
-		record EmailAttachment(string name, string type, string contentBytesBase64);
+		internal record EmailAttachment(string name, string type, string contentBytesBase64);
 	}
 }
