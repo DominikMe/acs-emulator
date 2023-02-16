@@ -12,7 +12,9 @@ namespace AcsEmulatorAPI.Models
 
         public DbSet<SmsMessage> SmsMessages { get; set; }
 
-        public AcsDbContext(DbContextOptions<AcsDbContext> options)
+		public DbSet<EmailMessage> EmailMessages { get; set; }
+
+		public AcsDbContext(DbContextOptions<AcsDbContext> options)
             : base(options)
         {
 

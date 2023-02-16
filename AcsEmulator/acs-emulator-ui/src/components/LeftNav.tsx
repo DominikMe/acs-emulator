@@ -40,6 +40,12 @@ export const LeftNav = () => {
           url: '/SMSUI',
           icon: 'Message',
           key: 'sms'
+        },
+        {
+          name: 'Email',
+          url: '/EmailUI',
+          icon: 'Mail',
+          key: 'email'
         }
       ],
     },
