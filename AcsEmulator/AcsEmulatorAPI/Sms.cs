@@ -1,5 +1,4 @@
 ﻿using AcsEmulatorAPI.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace AcsEmulatorAPI
 {
@@ -41,22 +40,11 @@ namespace AcsEmulatorAPI
             });
 
             // "Admin" API for the Emulator UI to be able to display all "sent" SMS
-            app.MapGet("/admin/sms", async (AcsDbContext db) =>
+            app.MapGet("/admin/sms", (AcsDbContext db) =>
             {
-                var messages = await db.SmsMessages
-                    .Select(m => new
-                    {
-                        m.Id,
-                        m.From,
-                        m.To,
-                        m.Message,
-                        m.EnableDeliveryReport,
-                        m.Tag
-                    }).ToListAsync();
-
                 return Results.Ok(new
                 {
-                    value = messages
+                    value = db.SmsMessages
                 });
             });
         }
