@@ -33,6 +33,8 @@ app.post("/webhook", (req, res) => {
         deliveryStatusDetails: body.data.deliveryStatusDetails,
         tag: body.data.tag
       });
+
+      res.status(200).send();
     }
     else if (body.data && body.eventType == smsReceivedEventType) {
       console.log("Got incoming SMS message, details:");
@@ -41,6 +43,8 @@ app.post("/webhook", (req, res) => {
         to: body.data.to,
         message: body.data.message
       });
+
+      res.status(200).send();
     }
   }
 });
