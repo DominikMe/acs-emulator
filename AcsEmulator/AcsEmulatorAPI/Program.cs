@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
 var connectionString = builder.Configuration.GetConnectionString("EmulatorDb");
 builder.Services.AddDbContext<AcsDbContext>(options => options
@@ -49,6 +51,9 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddSingleton(new Trouter());
+builder.Services.AddSingleton(new EventPublisher(
+	builder.Configuration["EventGridSimulatorSystemTopicHostname"],
+	builder.Configuration["EventGridSimulatorSystemTopicCredentials"]));
 
 var app = builder.Build();
 
