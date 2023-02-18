@@ -53,7 +53,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddSingleton(new Trouter());
 builder.Services.AddSingleton(new EventPublisher(
 	builder.Configuration["EventGridSimulatorSystemTopicHostname"],
-    builder.Configuration["EventGridSimulatorSystemTopicCredentials"]));
+	builder.Configuration["EventGridSimulatorSystemTopicCredentials"]));
 
 var app = builder.Build();
 
