@@ -36,7 +36,7 @@ namespace AcsEmulatorAPI
                     m.To,
                     messageId = m.Id,
                     httpStatusCode = 202,
-                    successfull = true
+                    successful = true
                 });
 
                 return Results.Accepted(value: new
