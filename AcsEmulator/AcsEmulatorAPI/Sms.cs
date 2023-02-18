@@ -10,7 +10,7 @@ namespace AcsEmulatorAPI
         {
             var resourceId = app.Configuration["ResourceId"];
 
-            app.MapPost("/sms", async (AcsDbContext db, SendMessageRequest req) =>
+            app.MapPost("/sms", async (AcsDbContext db, EventPublisher eventPublisher, SendMessageRequest req) =>
             {
                 var messagesToAdd = new List<SmsMessage>();
                 foreach (var recipient in req.SmsRecipients)
@@ -24,6 +24,12 @@ namespace AcsEmulatorAPI
 
                 db.SmsMessages.AddRange(messagesToAdd);
                 await db.SaveChangesAsync();
+
+                // Publish delivery reports
+                foreach (var message in messagesToAdd.Where(m => m.EnableDeliveryReport))
+                {
+                    await eventPublisher.SendSmsDeliveryReport(message.From, message.To, message.Tag);
+                }
 
                 var messages = messagesToAdd.Select(m => new
                 {
