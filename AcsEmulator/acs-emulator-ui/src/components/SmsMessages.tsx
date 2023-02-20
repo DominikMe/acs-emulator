@@ -6,12 +6,22 @@ import {
   ICommandBarItemProps,
   IColumn,
   ShimmeredDetailsList,
-  SelectionMode
+  SelectionMode,
+  Selection
 } from '@fluentui/react';
 import { SmsMessage, getAll as getAllSmsMessages } from '../services/sms';
 
 export const SmsMessages = () => {
   const [loadedSmsMessages, setLoadedSmsMessages] = useState<SmsMessage[] | undefined>(undefined);
+  const [selectedItem, setSelectedItem] = useState<object>();
+
+  const selection = new Selection({
+    onSelectionChanged: () => {
+      console.log('handle selection change',selection.getSelection())
+      setSelectedItem(selection.getSelection()[0]);
+    },
+    selectionMode: SelectionMode.single
+  });
 
   const stackTokens: IStackTokens = {
     childrenGap: 5,
@@ -86,7 +96,8 @@ export const SmsMessages = () => {
         items={loadedSmsMessages || []}
         enableShimmer={!loadedSmsMessages}
         columns={columns}
-        selectionMode={SelectionMode.none}
+        selectionMode={SelectionMode.single}
+        selection={selection}
       />
     </Stack>
   );
