@@ -60,6 +60,20 @@ namespace AcsEmulatorAPI
                     value = db.SmsMessages
                 });
             });
+
+            app.MapPost("/admin/sms:raiseSmsReceivedEvent", async (RaiseSmsReceivedEventRequest req, EventPublisher eventPublisher, ILogger<Program> log) =>
+            {
+                try
+                {
+                    await eventPublisher.SendSmsReceivedEvent(req.From, req.To, req.Message);
+                }
+                catch (Exception e)
+                {
+                    log.LogError(e, "Failed to raise SMSReceived event");
+                }
+
+                return Results.Ok();
+            });
         }
 
         record SendMessageRequest(
@@ -74,5 +88,7 @@ namespace AcsEmulatorAPI
             //DateTimeOffset? RepeatabilityFirstSent); todo: fix date parsing
 
         record SmsSendOptions(bool EnableDeliveryReport, string Tag);
+
+        record RaiseSmsReceivedEventRequest(string From, string To, string Message);
     }
 }
