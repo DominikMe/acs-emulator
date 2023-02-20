@@ -53,6 +53,31 @@ namespace AcsEmulatorAPI
                 });
         }
 
+        public async Task SendSmsReceivedEvent(string from, string to, string message)
+        {
+            if (!_doEvents) return;
+
+            await _eventGridClient.PublishEventsWithHttpMessagesAsync(
+                topicHostname: _simulatorSystemTopicHostname,
+                events: new List<EventGridEvent>
+                {
+                    new EventGridEvent
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Subject = $"/phonenumber/{to}", // indeed "to" here, because we are sending the SMS to the _ACS_ number
+                        Data = new SmsReceivedEvent(
+                            Guid.NewGuid().ToString(),
+                            from,
+                            to,
+                            message,
+                            DateTime.UtcNow),
+                        EventType = "Microsoft.Communication.SMSReceived",
+                        DataVersion = "1.0",
+                        EventTime = DateTime.UtcNow
+                    }
+                });
+        }
+
         record SmsDeliveryReport(
             string messageId,
             string from,
@@ -61,5 +86,12 @@ namespace AcsEmulatorAPI
             string deliveryStatusDetails,
             DateTime receivedTimeStamp,
             string tag);
+
+        record SmsReceivedEvent(
+            string messageId,
+            string from,
+            string to,
+            string message,
+            DateTime receivedTimeStamp);
     }
 }
