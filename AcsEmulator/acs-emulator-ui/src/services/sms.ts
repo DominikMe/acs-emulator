@@ -26,3 +26,19 @@ export const getAll = async (): Promise<SmsMessage[]>  => {
 
   return messages;
 }
+
+export const raiseSmsReceivedEvent = async (from: string, to: string, message: string): Promise<void> => {
+  const data = {
+    from: from,
+    to: to,
+    message: message
+  }
+
+  await fetch('/admin/sms:raiseSmsReceivedEvent', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+}

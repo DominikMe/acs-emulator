@@ -147,6 +147,7 @@ export const SmsMessages = () => {
           <NewIncomingSmsMessage
             from={newMessageFrom}
             to={newMessageTo}
+            onClosed={() => setNewIncomingMessageBoxVisible(false)}
           />
         </div>
       </Modal>
