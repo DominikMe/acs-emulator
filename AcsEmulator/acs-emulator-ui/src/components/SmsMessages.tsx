@@ -59,8 +59,9 @@ export const SmsMessages = () => {
 
   const replyButtonClicked = (ev?: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>) => {
     if (selectedItem) {
-      setNewMessageFrom(selectedItem?.from);
-      setNewMessageTo(selectedItem?.to);
+      // Note - "from" and "to" are reversed - we are creating a fake _response_  to the original message
+      setNewMessageFrom(selectedItem?.to);
+      setNewMessageTo(selectedItem?.from);
       setNewIncomingMessageBoxVisible(true);
     }
   }
