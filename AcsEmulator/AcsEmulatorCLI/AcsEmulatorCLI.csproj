@@ -19,4 +19,8 @@
     <ProjectReference Include="..\AcsEmulatorAPI\AcsEmulatorAPI.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\acs-emulator-ui\build\**\*.*" CopyToOutputDirectory="Always"></None>
+  </ItemGroup>
+
 </Project>
