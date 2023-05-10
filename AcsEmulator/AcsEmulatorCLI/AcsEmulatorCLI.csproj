@@ -23,4 +23,8 @@
     <None Include="..\acs-emulator-ui\build\**\*.*" CopyToOutputDirectory="Always"></None>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\AcsEmulatorAPI\trouter_selfSigned.pfx" CopyToOutputDirectory="Always"></None>
+  </ItemGroup>
+
 </Project>

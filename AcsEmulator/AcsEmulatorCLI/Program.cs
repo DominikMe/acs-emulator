@@ -15,11 +15,16 @@ class Program
 		Command connectionString = new("connectionString", description: "Get the ACS connection string for the emulator.");
 		Command installCert = new("installCert", description: "Install root cert to reroute real-time channel.");
 		Command uninstallCert = new("uninstallCert", description: "Uninstall root cert.");
+		Command repo = new("repo", description: "Open code repository.");
 
 		run.SetHandler(Run);
 		openApi.SetHandler(OpenSwaggerUI);
 		openDB.SetHandler(OpenDB);
 		openUI.SetHandler(OpenUI);
+		clean.SetHandler(CleanDB);
+		installCert.SetHandler(InstallCert);
+		connectionString.SetHandler(GetConnectionString);
+		repo.SetHandler(OpenRepo);
 
 		rootCommand.AddCommand(run);
 		rootCommand.AddCommand(openApi);
@@ -27,8 +32,9 @@ class Program
 		rootCommand.AddCommand(openUI);
 		rootCommand.AddCommand(clean);
 		rootCommand.AddCommand(connectionString);
-		rootCommand.AddCommand(installCert);
-		rootCommand.AddCommand(uninstallCert);
+		//rootCommand.AddCommand(installCert);
+		//rootCommand.AddCommand(uninstallCert);
+		rootCommand.AddCommand(repo);
 
 		return await rootCommand.InvokeAsync(args);
 	}
@@ -52,7 +58,6 @@ class Program
 
 	private static void OpenSwaggerUI() => Process.Start(new ProcessStartInfo("https://localhost/swagger") { UseShellExecute = true });
 
-	
 	private static void OpenDB()
 	{
 		try
@@ -95,5 +100,48 @@ class Program
 		{
 			Console.WriteLine(ex.Message);
 		}
+	}
+
+	private static void OpenRepo() => Process.Start(new ProcessStartInfo("https://github.com/DominikMe/acs-emulator") { UseShellExecute = true });
+
+	private static void CleanDB()
+	{
+		var path = $"{AppContext.BaseDirectory}/AcsEmulator.db";
+		if (File.Exists(path))
+			File.Delete(path);
+	}
+
+	private static void GetConnectionString() => Console.WriteLine("endpoint=https://localhost/;accessKey=pw==");
+
+	private static void InstallCert()
+	{
+		Console.WriteLine("""
+			Add 127.0.0.1 go.trouter.skype.com to your machine's hosts file to redirect the hard-coded URL to your localhost.
+			Press enter when done.
+			""");
+		Console.ReadLine();
+		Console.WriteLine("""
+			Install the trouter_selfSigned.pfx in your Trusted Roots certificate store using password 'mypassword'. Please uninstall the cert when no longer needed.
+			Press enter when done.
+			""");
+		Process.Start(new ProcessStartInfo("trouter_selfSigned.pfx") { UseShellExecute = true, WorkingDirectory = AppContext.BaseDirectory });
+		Console.ReadLine();
+
+		// oops, how do we build and package that?
+		Console.WriteLine("""
+			Add the following as a top property of appsettings.json:
+
+			"Kestrel": {
+			  "Endpoints": {
+			    "HttpsInlineCertFile": {
+			      "Url": "https://localhost",
+			      "Certificate": {
+			        "Path": "trouter_selfSigned.pfx",
+			        "Password": "mypassword"
+			      }
+			    }
+			  }
+			},
+			""");
 	}
 }

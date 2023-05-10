@@ -1,13 +1,39 @@
 # Emulator for Azure Communication Services
 Local emulator to run Azure Communication Services client SDKs without having to provision an Azure Communication Services resource.
 
-## Getting started
+## Download the emulator CLI tool
 
-* Install `dotnet ef` tool. Install by doing `dotnet tool install --global dotnet-ef` [Link for details](https://docs.microsoft.com/en-us/ef/core/cli/dotnet)
+### Install from GitHub
 
-* Run `dotnet ef database update` to update your local copy of the `AcsEmulator.db` in case new migrations were added.
+Make sure you have the .NET Core SDK installed and then run from a terminal:
 
-* Build and run the `AcsEmulatorApi` project
+```dotnetcli
+dotnet tool install -g <url todo>
+```
+
+### Running the tool
+
+**Usage:**
+
+`AcsEmulatorCLI [command] [options]`
+
+
+**Commands:**
+
+| Command            | Description                      |
+| ------------------ | -------------------------------- |
+|  `--version `        | Show version information
+|  `-?, -h, --help`    | Show help and usage information |
+|  `run`               | Run the emulator. |
+|  `openApi`           | Open the emulator's API in Swagger UI. |
+|  `openDB`            | Open the emulator's sqlite database.         |
+|  `openUI`            | Open the emulator UI. |
+|  `clean`             | Clean all data and reset the emulator state. |
+|  `connectionString`  | Get the ACS connection string for the emulator. |
+|  `repo`              | Open code repository. |
+
+
+## Using the emulator
 
 * You can use the `Try it` feature in the Swagger editor to send requests against the API
 
@@ -23,14 +49,27 @@ Local emulator to run Azure Communication Services client SDKs without having to
 
 * For inspecting the DB data directly, we recommend to install [DB Browser for SQLite](https://sqlitebrowser.org/) and use it to open the `AcsEmulator.db` file
 
-* To reset the emulator entirely and clear its data and state, delete the `AcsEmulator.db` file
+## Getting started with code
 
+* Install the `dotnet ef` tool: Run `dotnet tool install --global dotnet-ef` [Link for details](https://docs.microsoft.com/en-us/ef/core/cli/dotnet)
+
+* Run `dotnet ef database update` to update your local copy of the `AcsEmulator.db` in case new migrations were added.
+
+* Build and run the `AcsEmulatorApi` project
+
+* Build the emulator UI by navigating to `acs-emulator-ui`, then run `npm install` and `npm run start`
+
+* To build a new version of the CLI tool, first build the `acs-emulator-ui` with `npm run build` to build production bundles. Then build the `AcsEmulatorCLI` project (in the `Release` flavor)
+
+* For inspecting the DB data directly, we recommend to install [DB Browser for SQLite](https://sqlitebrowser.org/) and use it to open the `AcsEmulator.db` file
+
+* To reset the emulator entirely and clear its data and state, delete the `AcsEmulator.db` file
 
 ## Enable real-time notifications for Chat
 
-The URL for establishing the real-time notification channel, is unfortunately hard-coded in the Azure SDK. To enable real-time notifications in the emulator follow these steps:
+The URL for establishing the real-time notification channel, is unfortunately hard-coded in the Azure SDK. To enable real-time notifications in the emulator follow these steps (requires rebuilding the emulator from source):
 
-1. Add `127.0.0.1 go.trouter.skype.com` to your machine's hosts file to redirect the hard-coded URL to your localhost
+1. Add `127.0.0.1 go.trouter.skype.com` to your machine's hosts file to redirect the hard-coded URL to your localhost.
 
 1. Install the `trouter_selfSigned.pfx` in your Trusted Roots certificate store using password `mypassword`. Please uninstall the cert when no longer needed.
 
@@ -48,17 +87,25 @@ The URL for establishing the real-time notification channel, is unfortunately ha
   }
 },
 ```
-4. Restart all browsers to load the new root cert
+4. Rebuild and launch `AcsEmulatorAPI`.
 
-5. Run the `AcsEmulatorApi` project to start the emulator
+5. Restart all browsers to load the new root cert.
+
+6. Run the `AcsEmulatorApi` project to start the emulator.
 
 Now, the Chat SDK can establish a real-time notification channel which is backed by a websocket connection in the emulator's ASP .NET Core service.
 
 ## Limitations
 
-* Only `/identities` and `/chat` APIs have been implemented so far
-* `/identities` API has no auth and ignores the HMAC signature of the request
+* Only a subset of APIs have been implemented so far:
+  * `/identities`
+  * `/chat`
+  * `/email`
+  * `/sms`
+  * EventGrid events for Sms
+* All server/control-plane APIs are unauthenticated (HMAC / AAD is ignored)
+* API versioning is ignored, the implemented APIs are trying to be on a recent version
 * `/chat` APIs are incomplete
   * token scope `chat` is not enforced
-  * read receipts not implemented
+  * read receipts aren't implemented
   * only `messageReceived` and typing real-time notifications are implemented so far
