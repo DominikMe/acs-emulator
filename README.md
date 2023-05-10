@@ -35,7 +35,7 @@ dotnet tool install -g <url todo>
 
 ## Using the emulator
 
-* You can use the `Try it` feature in the Swagger editor to send requests against the API
+* You can use the `Try it` feature in the Swagger editor under `https://localhost/swagger` to send requests against the API
 
 * Use `"endpoint=https://localhost/;accessKey=pw=="` as your connection string when instantiating Azure Communication Services SDK service clients.
 
@@ -45,7 +45,9 @@ dotnet tool install -g <url todo>
 
 * You can also use endpoint `https://localhost/` to run the Live Preview of the UI library's [Chat composite](https://azure.github.io/communication-ui-library/?path=/story/composites-chat-joinexistingchatthread--join-existing-chat-thread). First, create two users with tokens and use one of the users to create a chat thread with the other user. Then, you can open two tabs side by side and fill in the the respective user, token, thread id and endpoint for each.
 
-* You can browse the emulator data by navigating to `acs-emulator-ui`, run `npm install` and `npm run start` and open the localhost web app url that gets printed to the console
+* You can browse the emulator data under `http://localhost:3000`
+
+![Emulator UI](./AcsEmulator/EmulatorUI.png)
 
 * For inspecting the DB data directly, we recommend to install [DB Browser for SQLite](https://sqlitebrowser.org/) and use it to open the `AcsEmulator.db` file
 
