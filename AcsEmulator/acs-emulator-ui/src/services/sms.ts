@@ -1,3 +1,5 @@
+import { ApiUrl } from "./apiUrl"
+
 export interface SmsMessage {
   id: string,
   from: string,
@@ -8,7 +10,7 @@ export interface SmsMessage {
 }
 
 export const getAll = async (): Promise<SmsMessage[]>  => {
-  const response = await fetch('/admin/sms');
+  const response = await fetch(`${ApiUrl}/admin/sms`);
   
   let messages: SmsMessage[] = [];
   const data = await response.json();
@@ -34,7 +36,7 @@ export const raiseSmsReceivedEvent = async (from: string, to: string, message: s
     message: message
   }
 
-  await fetch('/admin/sms:raiseSmsReceivedEvent', {
+  await fetch(`${ApiUrl}/admin/sms:raiseSmsReceivedEvent`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

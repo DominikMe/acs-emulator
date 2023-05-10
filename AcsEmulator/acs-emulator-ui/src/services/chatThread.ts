@@ -1,7 +1,8 @@
 import { ChatThreadProperties } from '@azure/communication-chat'
+import { ApiUrl } from './apiUrl'
 
 export const getAll = async (): Promise<ChatThreadProperties[]>  => {
-  const response = await fetch('/admin/chat/threads');
+  const response = await fetch(`${ApiUrl}/admin/chat/threads`);
   
   let threads: ChatThreadProperties[] = [];
   const data = await response.json();
