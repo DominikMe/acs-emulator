@@ -1,3 +1,5 @@
+import { ApiUrl } from "./apiUrl";
+
 // subset
 export interface EmailMessage {
   operationId: string,
@@ -14,7 +16,7 @@ export interface EmailMessage {
 }
 
 export const getAllEmails = async (): Promise<EmailMessage[]>  => {
-  const response = await fetch('/admin/emails');  
+  const response = await fetch(`${ApiUrl}/admin/emails`);  
   const data = await response.json();
   for (const email of data.value) {
     email.attachments = email.attachments.map((x: { name: string; }) => x.name).join(',')

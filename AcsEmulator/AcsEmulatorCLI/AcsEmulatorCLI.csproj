@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>acs-emulator</ToolCommandName>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <RepositoryUrl>https://github.com/DominikMe/acs-emulator.git</RepositoryUrl>
+    <Version>0.1.0-alpha.YYYYMMDD.r</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AcsEmulatorAPI\AcsEmulatorAPI.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\acs-emulator-ui\build\**\*.*" CopyToOutputDirectory="Always"></None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\AcsEmulatorAPI\trouter_selfSigned.pfx" CopyToOutputDirectory="Always"></None>
+  </ItemGroup>
+
+</Project>
