@@ -9,6 +9,8 @@
     <ToolCommandName>acs-emulator</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <RepositoryUrl>https://github.com/DominikMe/acs-emulator.git</RepositoryUrl>
+    <Version>0.1.0-alpha.YYYYMMDD.r</Version>
   </PropertyGroup>
 
   <ItemGroup>

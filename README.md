@@ -5,10 +5,10 @@ Local emulator to run Azure Communication Services client SDKs without having to
 
 ### Install from GitHub
 
-Make sure you have the .NET Core SDK installed and then run from a terminal:
+Make sure you have the .NET Core SDK installed, download the latest [AcsEmulatorCLI Release](https://github.com/DominikMe/acs-emulator/releases) and then run from a terminal:
 
 ```dotnetcli
-dotnet tool install -g <url todo>
+dotnet tool install -g --add-source [downloadFolder] AcsEmulatorCLI --version [nupkgVersion]
 ```
 
 ### Running the tool
@@ -16,7 +16,6 @@ dotnet tool install -g <url todo>
 **Usage:**
 
 `AcsEmulatorCLI [command] [options]`
-
 
 **Commands:**
 
@@ -31,7 +30,6 @@ dotnet tool install -g <url todo>
 |  `clean`             | Clean all data and reset the emulator state. |
 |  `connectionString`  | Get the ACS connection string for the emulator. |
 |  `repo`              | Open code repository. |
-
 
 ## Using the emulator
 
