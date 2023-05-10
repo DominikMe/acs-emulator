@@ -15,7 +15,7 @@ dotnet tool install -g --add-source [downloadFolder] AcsEmulatorCLI --version [n
 
 **Usage:**
 
-`AcsEmulatorCLI [command] [options]`
+`acs-emulator [command] [options]`
 
 **Commands:**
 
