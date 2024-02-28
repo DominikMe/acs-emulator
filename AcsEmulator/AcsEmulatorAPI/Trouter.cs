@@ -35,7 +35,7 @@ namespace AcsEmulatorAPI
 					url = $"https://localhost/trouter/f/{sessionId}/",
 					ttl = "585731",
 					healthUrl = $"https://localhost/trouter/h",
-					curlb = "https://trouter-azsc-uswe-0-b.trouter.skype.com:443",
+					curlb = "https://pub-ent-sece-05-t.trouter.teams.microsoft.com:443",
 					connectparams = new
 					{
 						sr = sr,
@@ -48,7 +48,40 @@ namespace AcsEmulatorAPI
 				};
 			});
 
-			app.MapGet("/socket.io/1", (HttpRequest request, HttpResponse response, string sr) => {
+            app.MapPost("/registrar/prod/v3/registrations", dynamic ([FromHeader(Name = "x-skypetoken")] string skypeTokenHeader) => {
+                var token = ValidateToken(skypeTokenHeader, app.Configuration["JwtSigningKey"]);
+                if (token is null)
+                    return Results.Unauthorized();
+
+                var sessionId = NewRandomBase64();
+                var sr = NewRandomBase64();
+                _srToSkypeId[sr] = token.Claims.First(x => x.Type == "skypeid").Value;
+
+                return new
+                {
+                    clientDescription = new {
+						appId = "AcsWeb",
+						aesKey = "",
+						languageId = "en-US",
+						platform = "SPOOL",
+						templateKey = "AcsWeb_Chat_1.8",
+						platformUIVersion = "0.0.0"
+					},
+					registrationId = Guid.NewGuid().ToString(),
+					nodeId = "",
+					transports = new {
+						TROUTER = new [] {
+							new {
+								context = "",
+								path = "https://trouter2-sece-4-a.trouter.teams.microsoft.com:3443/v4/f/0B0spgYWhkOCnpUZidcJlg/",
+								ttl = 7200
+							} 
+						}
+					}
+				};
+            });
+
+            app.MapGet("/socket.io/1", (HttpRequest request, HttpResponse response, string sr) => {
 				var skypeId = _srToSkypeId[sr];
 				var socketId = Guid.NewGuid().ToString();
 				_socketIdToSkypeId[socketId] = skypeId;

@@ -69,29 +69,35 @@ dotnet tool install -g --add-source [downloadFolder] AcsEmulatorCLI --version [n
 
 The URL for establishing the real-time notification channel, is unfortunately hard-coded in the Azure SDK. To enable real-time notifications in the emulator follow these steps (requires rebuilding the emulator from source):
 
-1. Add `127.0.0.1 go.trouter.skype.com` to your machine's hosts file to redirect the hard-coded URL to your localhost.
+1. Add `127.0.0.1 go.trouter.teams.microsoft.com` to your machine's hosts file to redirect the SDK's hard-coded URL to your localhost.
 
-1. Install the `trouter_selfSigned.pfx` in your Trusted Roots certificate store using password `mypassword`. Please uninstall the cert when no longer needed.
+1. Run `createSelfSignedCert.ps1`
+
+1. Install the generated `acsEmulator_selfSigned.pfx` in your certificate store under Trusted Root Certification Authorities using password `mypassword`. Please uninstall the cert when no longer needed, we're hoping to get rid of the need to install a self-signed cert soon and fully rely on the ASP.NET Core HTTPS development certificate instead.
+
+1. Relaunch your browser to load the newly installed root certificate.
 
 1. Add the following as a top property of `appsettings.json`:
+
 ```json
 "Kestrel": {
   "Endpoints": {
     "HttpsInlineCertFile": {
       "Url": "https://localhost",
       "Certificate": {
-        "Path": "trouter_selfSigned.pfx",
+        "Path": "acsEmulator_selfSigned.pfx",
         "Password": "mypassword"
       }
     }
   }
 },
 ```
-4. Rebuild and launch `AcsEmulatorAPI`.
 
-5. Restart all browsers to load the new root cert.
+6. Rebuild and launch `AcsEmulatorAPI`.
 
-6. Run the `AcsEmulatorApi` project to start the emulator.
+7. Restart all browsers to load the new root cert.
+
+8. Run the `AcsEmulatorApi` project to start the emulator.
 
 Now, the Chat SDK can establish a real-time notification channel which is backed by a websocket connection in the emulator's ASP .NET Core service.
 

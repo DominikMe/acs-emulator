@@ -1,10 +1,12 @@
 ﻿using AcsEmulatorAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace AcsEmulatorAPI
 {
-	// https://github.com/Azure/azure-rest-api-specs/blob/main/specification/communication/data-plane/Identity/stable/2022-10-01/CommunicationIdentity.json
-	public static class IdentityService
+    // https://github.com/Azure/azure-rest-api-specs/blob/main/specification/communication/data-plane/Identity/stable/2022-10-01/CommunicationIdentity.json
+    public static class IdentityService
 	{
 		public static void AddIdentity(this WebApplication app)
 		{
@@ -63,9 +65,10 @@ namespace AcsEmulatorAPI
 			});
 		}
 
-		private static dynamic CreateNewToken(string signingKey, string resourceId, string identity, string[] scopes, int? expiresInMinutes = 60)
+		private static dynamic CreateNewToken(string signingKey, string resourceId, string identity, TokenScope[] tokenSopes, int? expiresInMinutes = 60)
 		{
 			var expires = DateTime.UtcNow.AddMinutes(expiresInMinutes ?? 60);
+			var scopes = tokenSopes.Select(x => x.ToString()).ToArray();
 			var token = UserToken.GenerateJwtToken(signingKey, resourceId, identity, scopes, expires);
 
 			return new
@@ -83,12 +86,26 @@ namespace AcsEmulatorAPI
 			db.SaveChanges();
 
 			return u;
-		}
+        }
+        record Identity(string id);
 
-		record Identity(string id);
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        enum TokenScope
+		{
+            [EnumMember(Value = "chat")]
+            Chat,
+            [EnumMember(Value = "voip")]
+            Voip,
+            [EnumMember(Value = "chat.join")]
+            ChatJoin,
+            [EnumMember(Value = "chat.join.limited")]
+			ChatJoinLimited,
+            [EnumMember(Value = "voip.join")]
+            VoipJoin
+        }
 
-		record CreateIdentityRequest(string[]? createTokenWithScopes);
+		record CreateIdentityRequest(TokenScope[]? createTokenWithScopes);
 
-		record IssueTokenRequest(string[] scopes, int? expiresInMinutes);
+		record IssueTokenRequest(TokenScope[] scopes, int? expiresInMinutes);
 	}
 }
