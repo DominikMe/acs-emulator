@@ -1,7 +1,5 @@
 ﻿using AcsEmulatorAPI.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Runtime.Serialization;
-using System.Text.Json.Serialization;
 
 namespace AcsEmulatorAPI
 {
@@ -65,7 +63,7 @@ namespace AcsEmulatorAPI
 			});
 		}
 
-		private static dynamic CreateNewToken(string signingKey, string resourceId, string identity, TokenScope[] tokenSopes, int? expiresInMinutes = 60)
+		private static dynamic CreateNewToken(string signingKey, string resourceId, string identity, IdentityTokenScope[] tokenSopes, int? expiresInMinutes = 60)
 		{
 			var expires = DateTime.UtcNow.AddMinutes(expiresInMinutes ?? 60);
 			var scopes = tokenSopes.Select(x => x.ToString()).ToArray();
@@ -87,25 +85,5 @@ namespace AcsEmulatorAPI
 
 			return u;
         }
-        record Identity(string id);
-
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        enum TokenScope
-		{
-            [EnumMember(Value = "chat")]
-            Chat,
-            [EnumMember(Value = "voip")]
-            Voip,
-            [EnumMember(Value = "chat.join")]
-            ChatJoin,
-            [EnumMember(Value = "chat.join.limited")]
-			ChatJoinLimited,
-            [EnumMember(Value = "voip.join")]
-            VoipJoin
-        }
-
-		record CreateIdentityRequest(TokenScope[]? createTokenWithScopes);
-
-		record IssueTokenRequest(TokenScope[] scopes, int? expiresInMinutes);
 	}
 }

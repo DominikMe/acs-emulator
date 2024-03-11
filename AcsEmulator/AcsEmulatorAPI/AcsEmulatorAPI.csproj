@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -6,6 +6,7 @@
     <Title>Emulator for Azure Communication Services</Title>
   </PropertyGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="ACSEmulatorAPI.Tests" />
     <PackageReference Include="Microsoft.Azure.EventGrid" Version="3.2.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.4.0" />

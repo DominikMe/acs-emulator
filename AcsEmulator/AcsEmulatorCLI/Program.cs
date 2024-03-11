@@ -13,8 +13,6 @@ class Program
 		Command openUI = new("openUI", description: "Open the emulator UI.");
 		Command clean = new("clean", description: "Clean all data and reset the emulator state.");
 		Command connectionString = new("connectionString", description: "Get the ACS connection string for the emulator.");
-		Command installCert = new("installCert", description: "Install root cert to reroute real-time channel.");
-		Command uninstallCert = new("uninstallCert", description: "Uninstall root cert.");
 		Command repo = new("repo", description: "Open code repository.");
 
 		run.SetHandler(Run);
@@ -22,7 +20,6 @@ class Program
 		openDB.SetHandler(OpenDB);
 		openUI.SetHandler(OpenUI);
 		clean.SetHandler(CleanDB);
-		installCert.SetHandler(InstallCert);
 		connectionString.SetHandler(GetConnectionString);
 		repo.SetHandler(OpenRepo);
 
@@ -32,8 +29,6 @@ class Program
 		rootCommand.AddCommand(openUI);
 		rootCommand.AddCommand(clean);
 		rootCommand.AddCommand(connectionString);
-		//rootCommand.AddCommand(installCert);
-		//rootCommand.AddCommand(uninstallCert);
 		rootCommand.AddCommand(repo);
 
 		return await rootCommand.InvokeAsync(args);
@@ -113,35 +108,4 @@ class Program
 
 	private static void GetConnectionString() => Console.WriteLine("endpoint=https://localhost/;accessKey=pw==");
 
-	private static void InstallCert()
-	{
-		Console.WriteLine("""
-			Add 127.0.0.1 go.trouter.skype.com to your machine's hosts file to redirect the hard-coded URL to your localhost.
-			Press enter when done.
-			""");
-		Console.ReadLine();
-		Console.WriteLine("""
-			Install the trouter_selfSigned.pfx in your Trusted Roots certificate store using password 'mypassword'. Please uninstall the cert when no longer needed.
-			Press enter when done.
-			""");
-		Process.Start(new ProcessStartInfo("trouter_selfSigned.pfx") { UseShellExecute = true, WorkingDirectory = AppContext.BaseDirectory });
-		Console.ReadLine();
-
-		// oops, how do we build and package that?
-		Console.WriteLine("""
-			Add the following as a top property of appsettings.json:
-
-			"Kestrel": {
-			  "Endpoints": {
-			    "HttpsInlineCertFile": {
-			      "Url": "https://localhost",
-			      "Certificate": {
-			        "Path": "trouter_selfSigned.pfx",
-			        "Password": "mypassword"
-			      }
-			    }
-			  }
-			},
-			""");
-	}
 }
