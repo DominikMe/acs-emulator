@@ -2,6 +2,7 @@
 // TODO: Investigate why Azure.Messaging.EventGrid doesn't work.
 using Microsoft.Azure.EventGrid;
 using Microsoft.Azure.EventGrid.Models;
+using System.Text;
 
 namespace AcsEmulatorAPI
 {
@@ -78,6 +79,30 @@ namespace AcsEmulatorAPI
                 });
         }
 
+        public async Task SendIncomingCallEvent(string fromPstn, string toPstn)
+        {
+            if (!_doEvents) return;
+
+            await _eventGridClient.PublishEventsWithHttpMessagesAsync(
+                topicHostname: _simulatorSystemTopicHostname,
+                events: new List<EventGridEvent>
+                {
+                    new EventGridEvent
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Subject = $"/caller/4:{fromPstn}/recipient/4:{toPstn}",
+                        Data = new IncomingCallEvent(
+                            to: new PhoneNumberIdentifier($"4:{toPstn}", new PhoneNumberValue(toPstn)),
+                            from: new PhoneNumberIdentifier($"4:{fromPstn}", new PhoneNumberValue(fromPstn)),
+                            serverCallId: NewRandomBase64(),
+                            incomingCallContext: NewRandomBase64()),
+                        EventType = "Microsoft.Communication.IncomingCall",
+                        DataVersion = "1.0",
+                        EventTime = DateTime.UtcNow
+                    }
+                });
+        }
+
         record SmsDeliveryReport(
             string messageId,
             string from,
@@ -93,5 +118,23 @@ namespace AcsEmulatorAPI
             string to,
             string message,
             DateTime receivedTimeStamp);
+
+        record IncomingCallEvent(
+            PhoneNumberIdentifier to,
+            PhoneNumberIdentifier from,
+            string serverCallId,
+            string incomingCallContext
+            );
+
+        record PhoneNumberIdentifier(
+            string rawId,
+            PhoneNumberValue phoneNumber,
+            string kind = "phoneNumber"
+            );
+
+        record PhoneNumberValue(
+            string value);
+
+        private static string NewRandomBase64() => Convert.ToBase64String(Encoding.ASCII.GetBytes(Guid.NewGuid().ToString()));
     }
 }
