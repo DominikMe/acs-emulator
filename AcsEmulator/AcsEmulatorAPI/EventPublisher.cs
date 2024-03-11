@@ -1,7 +1,7 @@
 ﻿// Deprecated package, but works with EventGridSimulator.
 // TODO: Investigate why Azure.Messaging.EventGrid doesn't work.
-using Microsoft.Azure.EventGrid;
-using Microsoft.Azure.EventGrid.Models;
+using Azure;
+using Azure.Messaging.EventGrid;
 using System.Text;
 
 namespace AcsEmulatorAPI
@@ -11,7 +11,7 @@ namespace AcsEmulatorAPI
         private readonly string _simulatorSystemTopicHostname;
         private readonly bool _doEvents;
 
-        private EventGridClient _eventGridClient;
+        private EventGridPublisherClient _eventGridClient;
 
         public EventPublisher(string simulatorSystemTopicHostname, string simulatorSystemTopicCredentials)
         {
@@ -21,7 +21,7 @@ namespace AcsEmulatorAPI
 
             if (_doEvents)
             {
-                _eventGridClient = new EventGridClient(new TopicCredentials("TheLocal+DevelopmentKey="));
+                _eventGridClient = new EventGridPublisherClient(new System.Uri(simulatorSystemTopicHostname), new AzureKeyCredential("TheLocal+DevelopmentKey="));
             }
         }
 
@@ -29,16 +29,9 @@ namespace AcsEmulatorAPI
         {
             if (!_doEvents) return;
 
-            await _eventGridClient.PublishEventsWithHttpMessagesAsync(
-                topicHostname: _simulatorSystemTopicHostname,
-                events: new List<EventGridEvent>
-                {
-                    new EventGridEvent
-                    {
-                        Id = Guid.NewGuid().ToString(),
-                        //Topic = "/subscriptions/<my-sub-id>/resourceGroups/<my-rg-name>/providers/microsoft.communication/communicationservices/<my-resource-name>",
-                        Subject = $"/phonenumber/{from}",
-                        Data = new SmsDeliveryReport(
+            await _eventGridClient.SendEventAsync(
+                    new EventGridEvent(subject: $"/phonenumber/{from}", eventType: "Microsoft.Communication.SMSDeliveryReportReceived", dataVersion: "1.0",
+                        data: new SmsDeliveryReport(
                             Guid.NewGuid().ToString(),
                             from,
                             to,
@@ -46,61 +39,34 @@ namespace AcsEmulatorAPI
                             "2000: Message Delivered Successfully",
                             DateTime.UtcNow,
                             //deliveryAttempts: [Array],
-                            tag),
-                        EventType = "Microsoft.Communication.SMSDeliveryReportReceived",
-                        DataVersion = "1.0",
-                        EventTime = DateTime.UtcNow
-                    }
-                });
+                            tag)));
         }
 
         public async Task SendSmsReceivedEvent(string from, string to, string message)
         {
             if (!_doEvents) return;
 
-            await _eventGridClient.PublishEventsWithHttpMessagesAsync(
-                topicHostname: _simulatorSystemTopicHostname,
-                events: new List<EventGridEvent>
-                {
-                    new EventGridEvent
-                    {
-                        Id = Guid.NewGuid().ToString(),
-                        Subject = $"/phonenumber/{to}", // indeed "to" here, because we are sending the SMS to the _ACS_ number
-                        Data = new SmsReceivedEvent(
+            await _eventGridClient.SendEventAsync(
+                    new EventGridEvent(subject: $"/phonenumber/{to}", eventType: "Microsoft.Communication.SMSReceived", dataVersion: "1.0",
+                        data: new SmsReceivedEvent(
                             Guid.NewGuid().ToString(),
                             from,
                             to,
                             message,
-                            DateTime.UtcNow),
-                        EventType = "Microsoft.Communication.SMSReceived",
-                        DataVersion = "1.0",
-                        EventTime = DateTime.UtcNow
-                    }
-                });
+                            DateTime.UtcNow)));
         }
 
         public async Task SendIncomingCallEvent(string fromPstn, string toPstn)
         {
             if (!_doEvents) return;
 
-            await _eventGridClient.PublishEventsWithHttpMessagesAsync(
-                topicHostname: _simulatorSystemTopicHostname,
-                events: new List<EventGridEvent>
-                {
-                    new EventGridEvent
-                    {
-                        Id = Guid.NewGuid().ToString(),
-                        Subject = $"/caller/4:{fromPstn}/recipient/4:{toPstn}",
-                        Data = new IncomingCallEvent(
+            await _eventGridClient.SendEventAsync(
+                    new EventGridEvent(subject: $"/caller/4:{fromPstn}/recipient/4:{toPstn}", eventType: "Microsoft.Communication.IncomingCall", dataVersion: "1.0",
+                        data: new IncomingCallEvent(
                             to: new PhoneNumberIdentifier($"4:{toPstn}", new PhoneNumberValue(toPstn)),
                             from: new PhoneNumberIdentifier($"4:{fromPstn}", new PhoneNumberValue(fromPstn)),
                             serverCallId: NewRandomBase64(),
-                            incomingCallContext: NewRandomBase64()),
-                        EventType = "Microsoft.Communication.IncomingCall",
-                        DataVersion = "1.0",
-                        EventTime = DateTime.UtcNow
-                    }
-                });
+                            incomingCallContext: NewRandomBase64())));
         }
 
         record SmsDeliveryReport(
