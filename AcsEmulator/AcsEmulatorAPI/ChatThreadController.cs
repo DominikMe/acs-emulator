@@ -87,7 +87,7 @@ namespace AcsEmulatorAPI
 
 			app.MapPost(
 				"/chat/threads/{chatThreadId}/messages",
-				[Authorize] async (ClaimsPrincipal principal, AcsDbContext db, string chatThreadId, SendChatMessageRequest req) =>
+				[Authorize] async (ClaimsPrincipal principal, AcsDbContext db, string chatThreadId, SendChatMessageRequest req, ILogger<Program> log) =>
 				{
 					var context = await GetRequestContext(
 						principal,
@@ -117,7 +117,7 @@ namespace AcsEmulatorAPI
 
 						await db.SaveChangesAsync();
 
-						await NotifyChatMessageReceived(app.Services.GetService<Trouter>(), thisThread.Id, msg, thisThread.Participants);
+						await NotifyChatMessageReceived(app.Services.GetService<Trouter>(), thisThread.Id, msg, thisThread.Participants, log);
 
 						return Results.Created(
 							$"/chat/threads/{chatThreadId}/messages/{msg.Id}",
@@ -215,7 +215,7 @@ namespace AcsEmulatorAPI
 
 			app.MapPost(
 				"/chat/threads/{chatThreadId}/typing",
-				[Authorize] async (ClaimsPrincipal principal, AcsDbContext db, string chatThreadId, TypingRequest req) =>
+				[Authorize] async (ClaimsPrincipal principal, AcsDbContext db, string chatThreadId, TypingRequest req, ILogger<Program> log) =>
 				{
 					var context = await GetRequestContext(
 						principal,
@@ -231,7 +231,7 @@ namespace AcsEmulatorAPI
 
 					if (context is ThreadRequestValidContext(User thisUser, ChatThread thisThread))
 					{
-						await NotifyTyping(app.Services.GetService<Trouter>(), thisThread.Id, thisUser.RawId, req.SenderDisplayName, thisThread.Participants, Guid.NewGuid().ToString());
+						await NotifyTyping(app.Services.GetService<Trouter>(), thisThread.Id, thisUser.RawId, req.SenderDisplayName, thisThread.Participants, Guid.NewGuid().ToString(), log);
 
 						return Results.Ok();
 					}
@@ -272,19 +272,19 @@ namespace AcsEmulatorAPI
 			return new ThreadRequestValidContext(thisUser, thisThread);
 		}
 
-		private static async Task NotifyChatMessageReceived(Trouter trouter, string threadId, ChatMessage message, IEnumerable<User> participants)
+		private static async Task NotifyChatMessageReceived(Trouter trouter, string threadId, ChatMessage message, IEnumerable<User> participants, ILogger<Program> log)
 		{
 			foreach (var participant in participants)
 			{
-				await trouter.SendChatMessageReceived(participant.RawId, threadId, message);
+				await trouter.SendChatMessageReceived(participant.RawId, threadId, message, log);
 			}
 		}
 
-		private static async Task NotifyTyping(Trouter trouter, string threadId, string senderId, string? senderDisplayName, IEnumerable<User> participants, string messageId)
+		private static async Task NotifyTyping(Trouter trouter, string threadId, string senderId, string? senderDisplayName, IEnumerable<User> participants, string messageId, ILogger<Program> log)
 		{
 			foreach (var participant in participants)
 			{
-				await trouter.SendTyping(senderId, senderDisplayName, participant.RawId, threadId, messageId);
+				await trouter.SendTyping(senderId, senderDisplayName, participant.RawId, threadId, messageId, log);
 			}
 		}
 	}

@@ -2,7 +2,11 @@ using AcsEmulatorAPI;
 using AcsEmulatorAPI.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
@@ -55,6 +59,46 @@ builder.Services.AddSingleton(new CallAutomationWebSockets());
 builder.Services.AddSingleton(new EventPublisher(
 	builder.Configuration["EventGridSimulatorSystemTopicHostname"],
 	builder.Configuration["EventGridSimulatorSystemTopicCredentials"]));
+
+
+// If using Jaeger, set the OpenTelemetryEndpointUrl environment variable to the Jaeger endpoint
+var tracingOtlpEndpoint = builder.Configuration["OpenTelemetryEndpointUrl"];
+var otel = builder.Services.AddOpenTelemetry();
+
+// Configure OpenTelemetry Resources with the application name
+otel.ConfigureResource(resource => resource
+    .AddService(serviceName: builder.Environment.ApplicationName));
+
+// Add Metrics for ASP.NET Core and our custom metrics and export to Prometheus
+otel.WithMetrics(metrics => metrics
+	// Metrics provider from OpenTelemetry
+	.AddAspNetCoreInstrumentation()
+	// Metrics provides by ASP.NET Core in .NET 8
+	.AddMeter("Microsoft.AspNetCore.Hosting")
+	.AddMeter("Microsoft.AspNetCore.Server.Kestrel"));
+
+// Add Tracing for ASP.NET Core and our custom ActivitySource and export to Jaeger
+otel.WithTracing(tracing =>
+{
+    tracing.AddAspNetCoreInstrumentation();
+    tracing.AddHttpClientInstrumentation();
+	tracing.AddSqlClientInstrumentation(
+        options => options.SetDbStatementForText = true
+		);
+    if (tracingOtlpEndpoint is not null && tracingOtlpEndpoint != "")
+    {
+        tracing.AddOtlpExporter(otlpOptions =>
+        {
+            otlpOptions.Endpoint = new Uri(tracingOtlpEndpoint);
+        });
+    }
+    else
+    {
+        tracing.AddConsoleExporter();
+    }
+});
+
+
 
 var app = builder.Build();
 
