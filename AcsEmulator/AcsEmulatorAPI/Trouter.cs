@@ -86,7 +86,7 @@ namespace AcsEmulatorAPI
 				var socketId = Guid.NewGuid().ToString();
 				_socketIdToSkypeId[socketId] = skypeId;
 				return $"{socketId}:70:70:websocket";
-			}).RequireCors("trouterPolicy");
+			}).RequireCors("websocketPolicy");
 
 			app.MapGet("/socket.io/1/websocket/{socketId}", async (HttpContext context, string socketId) =>
 			{
@@ -112,7 +112,7 @@ namespace AcsEmulatorAPI
 				_skypeIdToSockets[skypeId].Remove(webSocket);
 
 				return Results.Ok();
-			}).RequireCors("trouterPolicy");
+			}).RequireCors("websocketPolicy");
 
 			app.MapGet("/trouter/h", () => Results.Ok());
 

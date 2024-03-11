@@ -46,6 +46,12 @@ export const LeftNav = () => {
           url: '/EmailUI',
           icon: 'Mail',
           key: 'email'
+        },
+        {
+          name: 'Phone',
+          url: '/PhoneUI',
+          icon: 'Phone',
+          key: 'phone'
         }
       ],
     },

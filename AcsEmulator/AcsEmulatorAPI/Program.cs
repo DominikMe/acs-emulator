@@ -21,7 +21,7 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddCors(options => {
 	options.AddDefaultPolicy(builder => builder.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
-	options.AddPolicy("trouterPolicy", builder => builder.AllowAnyMethod().AllowAnyHeader().AllowCredentials().SetIsOriginAllowed(_ => true));
+	options.AddPolicy("websocketPolicy", builder => builder.AllowAnyMethod().AllowAnyHeader().AllowCredentials().SetIsOriginAllowed(_ => true));
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -51,6 +51,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddSingleton(new Trouter());
+builder.Services.AddSingleton(new CallAutomationWebSockets());
 builder.Services.AddSingleton(new EventPublisher(
 	builder.Configuration["EventGridSimulatorSystemTopicHostname"],
 	builder.Configuration["EventGridSimulatorSystemTopicCredentials"]));
@@ -84,5 +85,6 @@ app.UseWebSockets();
 app.MapGroup("").MapEmailsApi();
 
 app.Services.GetService<Trouter>().AddEndpoints(app);
+app.Services.GetService<CallAutomationWebSockets>().AddEndpoints(app);
 
 app.Run();
