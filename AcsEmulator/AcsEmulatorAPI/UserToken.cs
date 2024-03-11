@@ -5,7 +5,7 @@ using System.Text;
 
 namespace AcsEmulatorAPI
 {
-	static class UserToken
+	public static class UserToken
 	{
 		public static string GenerateJwtToken(string signingKey, string resourceId, string identity, string[] scopes, DateTime expires)
 		{
@@ -37,6 +37,6 @@ namespace AcsEmulatorAPI
 		};
 
 		// todo use to validate acsScope for chat
-		public static bool HasAcsScope(IEnumerable<Claim> claims, string scope) => claims.First(x => x.Type == "acsScope").Value.Split(" ").Any(x => x == scope);
+		public static bool HasAcsScope(IEnumerable<Claim> claims, string scope) => claims.FirstOrDefault(x => x.Type == "acsScope", null)?.Value.Split(" ").Any(x => x == scope) ?? false;
 	}
 }

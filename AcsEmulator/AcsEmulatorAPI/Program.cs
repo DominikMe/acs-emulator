@@ -86,3 +86,6 @@ app.MapGroup("").MapEmailsApi();
 app.Services.GetService<Trouter>().AddEndpoints(app);
 
 app.Run();
+
+// Allow Unit testing of ASP .NET
+public partial class Program { }
