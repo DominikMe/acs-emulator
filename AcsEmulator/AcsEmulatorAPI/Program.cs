@@ -85,7 +85,7 @@ otel.WithTracing(tracing =>
 	tracing.AddSqlClientInstrumentation(
         options => options.SetDbStatementForText = true
 		);
-    if (tracingOtlpEndpoint is not null && tracingOtlpEndpoint != "")
+    if (!string.IsNullOrEmpty(tracingOtlpEndpoint))
     {
         tracing.AddOtlpExporter(otlpOptions =>
         {
