@@ -24,7 +24,7 @@ namespace AcsEmulatorAPI.Models
 		public string? VersionId { get; set; }
 	}
 
-	[Table("AddParticipantsChatMessages")]
+	//[Table("AddParticipantsChatMessages")]
 	public class AddParticipantsChatMessage: ChatMessage
 	{
 		public virtual ICollection<AddedParticipant> AddedParticipants { get; set; }
@@ -41,9 +41,4 @@ namespace AcsEmulatorAPI.Models
 		public DateTimeOffset? ShareHistoryTime { get; set; }
 	}
 
-
-	// ChatMessage in Payload do not match above record ( SequenceId is string, and many other fields are missing)
-	// Creating another one, but will need to be merged
-    // Response of /chat/threads/{thread_id}/messages GET
-	public record ChatMessagesResponse(List<ChatMessage> Value);
 }

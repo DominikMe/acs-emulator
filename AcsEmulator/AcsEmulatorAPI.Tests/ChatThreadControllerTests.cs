@@ -61,20 +61,16 @@ namespace AcsEmulatorAPI.Tests
             // Assert any of the participants is the one we added
             Assert.IsTrue(getParticipants.Value.Any(x => x.CommunicationIdentifier.RawId == identity2Str));
 
-
             // Sends a Message
             var message = _client.PostAsJsonAsync($"/chat/threads/{_chatThreadCreationInfo.Id}/messages",
                                new SendChatMessageRequest("Hello World", "John Doe", ChatMessageType.Text)).Result;
             Assert.AreEqual(System.Net.HttpStatusCode.Created, message.StatusCode);
 
             // Get Messages
-            //var getMessages = _client.GetFromJsonAsync<ChatMessagesResponse>($"/chat/threads/{_chatThreadCreationInfo.Id}/messages").Result;
             var getMessages = _client.GetStringAsync($"/chat/threads/{_chatThreadCreationInfo.Id}/messages").Result;
             Assert.IsNotNull(getMessages);
-            Console.WriteLine(getMessages);
-
-
-
+            Assert.IsTrue(getMessages.Contains("Hello World"));
+            
         }
     }
 }
