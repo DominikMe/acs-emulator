@@ -18,7 +18,7 @@ namespace AcsEmulatorAPI
 				using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
 				_sockets.Add(phoneNumber, webSocket);
 
-				await Listen(webSocket, phoneNumber,log);
+				await Listen(webSocket, phoneNumber, log);
                 _sockets.Remove(phoneNumber);
 
 				return Results.Ok();

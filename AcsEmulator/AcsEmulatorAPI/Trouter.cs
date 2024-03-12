@@ -158,7 +158,7 @@ namespace AcsEmulatorAPI
 					));
 				}
 			}
-            log.LogError("Failed to get active websocket for " + receiverRawId);
+			log.LogError("Failed to get active websocket for " + receiverRawId);
 		}
 
 		public async Task SendTyping(string senderRawId, string? senderDisplayName, string receiverRawId, string threadId, string messageId, ILogger<Program> log)
