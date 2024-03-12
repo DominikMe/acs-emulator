@@ -19,7 +19,7 @@ namespace AcsEmulatorAPI.Models
 		public DateTimeOffset CreatedOn { get; set; } = DateTimeOffset.UtcNow;
 
 		// SequenceId is sent as String in (/chat/threads/{thread_id}/messages)
-        public string SequenceId { get; set; }
+		public string SequenceId { get; set; }
 
 		public string? VersionId { get; set; }
 	}
