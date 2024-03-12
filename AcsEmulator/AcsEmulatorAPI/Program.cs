@@ -78,6 +78,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.AddIdentity();
+app.AddCallAutomationEndpoints();
 app.AddChatEndpoints();
 app.AddChatThreadEndpoints();
 app.AddSms();
