@@ -105,7 +105,7 @@ namespace AcsEmulatorAPI.Migrations
                     b.ToTable("ChatThreads");
                 });
 
-            modelBuilder.Entity("AcsEmulatorAPI.Models.EmailMessage", b =>
+            modelBuilder.Entity("AcsEmulatorAPI.Models.EmailMessageInternal", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
@@ -278,7 +278,7 @@ namespace AcsEmulatorAPI.Migrations
 
             modelBuilder.Entity("AcsEmulatorAPI.Models.EmailMessageAttachment", b =>
                 {
-                    b.HasOne("AcsEmulatorAPI.Models.EmailMessage", null)
+                    b.HasOne("AcsEmulatorAPI.Models.EmailMessageInternal", null)
                         .WithMany("Attachments")
                         .HasForeignKey("EmailMessageId");
                 });
@@ -318,7 +318,7 @@ namespace AcsEmulatorAPI.Migrations
                     b.Navigation("UserChatThreads");
                 });
 
-            modelBuilder.Entity("AcsEmulatorAPI.Models.EmailMessage", b =>
+            modelBuilder.Entity("AcsEmulatorAPI.Models.EmailMessageInternal", b =>
                 {
                     b.Navigation("Attachments");
                 });
