@@ -1,6 +1,4 @@
-﻿// Deprecated package, but works with EventGridSimulator.
-// TODO: Investigate why Azure.Messaging.EventGrid doesn't work.
-using Azure;
+﻿using Azure;
 using Azure.Messaging.EventGrid;
 using System.Text;
 

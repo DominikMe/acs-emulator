@@ -5,7 +5,7 @@ using System.Net.Http.Json;
 
 
 
-namespace AcsEmulatorAPI
+namespace AcsEmulatorAPI.Tests
 {
     [TestClass()]
     public class IdentityServiceTests
@@ -16,7 +16,6 @@ namespace AcsEmulatorAPI
             _factory = new WebApplicationFactory<Program>();
         }
 
-        record TokenResponse(string token, string expiresOn);
 
         // Since identities are stateful, this is more an end-to-end test than an unit one.
         // Having a class to represent identities and extract code outside of route mapping would help
@@ -37,7 +36,7 @@ namespace AcsEmulatorAPI
             var token = client.PostAsJsonAsync(location + "/:issueAccessToken", new IssueTokenRequest([IdentityTokenScope.Chat], 60)).Result;
             Assert.AreEqual(HttpStatusCode.OK, token.StatusCode);
             //Console.WriteLine(token.Content.ReadAsStringAsync().Result);
-            TokenResponse? tokenResponse = token.Content.ReadFromJsonAsync<TokenResponse>().Result;
+            IdentityTokenResponse? tokenResponse = token.Content.ReadFromJsonAsync<IdentityTokenResponse>().Result;
 
             Assert.IsNotNull(tokenResponse);
             // Token should be a long string

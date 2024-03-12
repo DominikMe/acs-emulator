@@ -1,4 +1,7 @@
-﻿namespace AcsEmulatorAPI.Models
+﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
+
+namespace AcsEmulatorAPI.Models
 {
 	public class CommunicationIdentifier
 	{
@@ -21,14 +24,20 @@
 
 	public record AddChatParticipantsRequest(List<ChatParticipant> Participants);
 
-	public enum ChatMessageType
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum ChatMessageType
 	{
-		Text,
-		Html,
-		TopicUpdated,
-		ParticipantAdded,
-		ParticipantRemoved
-	}
+        [EnumMember(Value = "text")]
+        Text,
+        [EnumMember(Value = "html")]
+        Html,
+        [EnumMember(Value = "topicUpdated")]
+        TopicUpdated,
+        [EnumMember(Value = "participantAdded")]
+        ParticipantAdded,
+        [EnumMember(Value = "participantRemoved")]
+        ParticipantRemoved
+    }
 
 	public record SendChatMessageRequest(
 		string Content,
@@ -36,4 +45,18 @@
 		ChatMessageType? Type);
 
 	public record TypingRequest(string? SenderDisplayName);
+
+	// Response of /chat/threads POST
+	public record ChatThreadCreation(ChatThreadCreationInfo ChatThread);
+	public record ChatThreadCreationInfo(
+		string Id,
+		string Topic,
+		DateTimeOffset? CreatedOn,
+		CommunicationIdentifier? CreatedByCommunicationIdentifier);
+
+	// Response of /chat/threads GET
+	public record ChatThreadInfo(List<ChatThreadCreationInfo> Value);
+
+	// Response of /chat/threads/{chatThreadId}/participants GET
+	public record ChatParticipantsInfo(List<ChatParticipant> Value);
 }

@@ -24,4 +24,8 @@ namespace AcsEmulatorAPI.Models
 
     record IssueTokenRequest(IdentityTokenScope[] scopes, int? expiresInMinutes);
 
+    // Response Type of /identity/{id}/:issueAccessToken
+    record IdentityTokenResponse(string token, string expiresOn);
+
+
 }

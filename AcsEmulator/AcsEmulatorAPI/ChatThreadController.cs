@@ -111,7 +111,7 @@ namespace AcsEmulatorAPI
 							Sender = thisUser,
 							SenderDisplayName = req.SenderDisplayName,
 							Type = req.Type ?? ChatMessageType.Text,
-							SequenceId = nextSequenceId
+							SequenceId = nextSequenceId.ToString()
 						};
 						thisThread.Messages.Add(msg);
 
@@ -165,8 +165,8 @@ namespace AcsEmulatorAPI
 
 								sequenceId = m.SequenceId.ToString(),
 
-								// TODO
-								versionId = "1",
+								// Now versionId is gotten from Db, fallback to "1"
+								versionId = m.VersionId ?? "1",
 
 								content = new
 								{
