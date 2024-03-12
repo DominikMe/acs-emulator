@@ -46,6 +46,8 @@ namespace AcsEmulatorAPI
                     successful = true
                 });
 
+                log.LogInformation("Number of SMS sent: {0}", messages.Count());
+
                 return Results.Accepted(value: new
                 {
                     value = messages

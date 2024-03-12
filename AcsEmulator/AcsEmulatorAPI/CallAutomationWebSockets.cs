@@ -10,7 +10,7 @@ namespace AcsEmulatorAPI
 
 		public void AddEndpoints(WebApplication app)
 		{
-			app.MapGet("/admin/callAutomation/sockets/{phoneNumber}", async (HttpContext context, string phoneNumber) =>
+			app.MapGet("/admin/callAutomation/sockets/{phoneNumber}", async (HttpContext context, string phoneNumber, ILogger<Program> log) =>
 			{
 				if (!context.WebSockets.IsWebSocketRequest)
 					return Results.BadRequest();
@@ -18,7 +18,7 @@ namespace AcsEmulatorAPI
 				using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
 				_sockets.Add(phoneNumber, webSocket);
 
-				await Listen(webSocket, phoneNumber);
+				await Listen(webSocket, phoneNumber, log);
                 _sockets.Remove(phoneNumber);
 
 				return Results.Ok();
@@ -39,16 +39,16 @@ namespace AcsEmulatorAPI
             });
         }
 
-        public async Task AnswerPhoneCall(string phoneNumber, string callerId) => await SendMessage(phoneNumber, callerId, JsonSerializer.Serialize(
+        public async Task AnswerPhoneCall(string phoneNumber, string callerId, ILogger<Program> log) => await SendMessage(phoneNumber, callerId, JsonSerializer.Serialize(
                     new
                     {
                         action = "answer",
                         time = DateTimeOffset.UtcNow.ToString("o"),
                         callerId,
                     }
-                ));
+                ), log);
 
-        public async Task PlayText(string phoneNumber, string callerId, string text) => await SendMessage(phoneNumber, callerId, JsonSerializer.Serialize(
+        public async Task PlayText(string phoneNumber, string callerId, string text, ILogger<Program> log) => await SendMessage(phoneNumber, callerId, JsonSerializer.Serialize(
                     new
                     {
                         action = "playText",
@@ -56,15 +56,15 @@ namespace AcsEmulatorAPI
                         callerId,
 						text
                     }
-                ));
+                ), log);
 
-        private async Task SendMessage(string phoneNumber, string callerId, string message)
+        private async Task SendMessage(string phoneNumber, string callerId, string message, ILogger<Program> log)
 		{
             if (_sockets.TryGetValue(phoneNumber, out var socket))
             {
                 await SendMessage(socket, message);
             }
-            Console.WriteLine("Failed to get active websocket for " + phoneNumber);
+            log.LogError("Failed to get active websocket for " + phoneNumber);
         }
 
         private static Task SendMessage(WebSocket webSocket, string message)
@@ -74,7 +74,7 @@ namespace AcsEmulatorAPI
 					true,
 					CancellationToken.None);
 
-		private async Task Listen(WebSocket webSocket, string phoneNumber)
+		private async Task Listen(WebSocket webSocket, string phoneNumber, ILogger<Program> log)
 		{
 			var buffer = new byte[1024 * 4];
 			var receiveResult = await webSocket.ReceiveAsync(
@@ -85,7 +85,7 @@ namespace AcsEmulatorAPI
 				var received = Encoding.UTF8.GetString(buffer);
 
 				// todo: handle
-				Console.WriteLine($"{phoneNumber} sent: {received}");
+				log.LogInformation($"{phoneNumber} sent: {received}");
 
 				Array.Clear(buffer, 0, buffer.Length);
 				receiveResult = await webSocket.ReceiveAsync(

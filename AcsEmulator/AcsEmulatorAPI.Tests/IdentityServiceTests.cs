@@ -26,7 +26,7 @@ namespace AcsEmulatorAPI
             var client = _factory.CreateClient();
 
             var response = client.PostAsJsonAsync("/identities/", new CreateIdentityRequest([IdentityTokenScope.Chat])).Result;
-            Console.WriteLine(response);
+            //Console.WriteLine(response);
             Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
             var location = response.Headers.Location;
             Assert.IsNotNull(location);

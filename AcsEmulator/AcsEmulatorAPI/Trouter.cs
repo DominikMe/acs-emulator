@@ -119,7 +119,7 @@ namespace AcsEmulatorAPI
 			app.MapGet("/trouter/f/{sessionId}", () => Results.Ok());
 		}
 
-		public async Task SendChatMessageReceived(string receiverRawId, string threadId, ChatMessage message)
+		public async Task SendChatMessageReceived(string receiverRawId, string threadId, ChatMessage message, ILogger<Program> log)
 		{
 			if(_skypeIdToSockets.TryGetValue(receiverRawId, out var sockets))
 			{
@@ -158,10 +158,10 @@ namespace AcsEmulatorAPI
 					));
 				}
 			}
-			Console.WriteLine("Failed to get active websocket for " + receiverRawId);
+			log.LogError("Failed to get active websocket for " + receiverRawId);
 		}
 
-		public async Task SendTyping(string senderRawId, string? senderDisplayName, string receiverRawId, string threadId, string messageId)
+		public async Task SendTyping(string senderRawId, string? senderDisplayName, string receiverRawId, string threadId, string messageId, ILogger<Program> log)
 		{
 			if (_skypeIdToSockets.TryGetValue(receiverRawId, out var sockets))
 			{
@@ -193,7 +193,7 @@ namespace AcsEmulatorAPI
 					));
 				}
 			}
-			Console.WriteLine("Failed to get active websocket for " + receiverRawId);
+			log.LogError("Failed to get active websocket for " + receiverRawId);
 		}
 
 		private JwtSecurityToken? ValidateToken(string token, string jwtSigningKey)
