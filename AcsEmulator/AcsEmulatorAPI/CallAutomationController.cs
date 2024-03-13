@@ -12,7 +12,7 @@ namespace AcsEmulatorAPI
             {
                 // MVP0: PhoneNumber places a call to a CommunicationUser
 
-                if (req.Targets.IsNullOrEmpty())
+                if (req.SourceCallerIdNumber == null || req.Targets.IsNullOrEmpty())
                 {
                     return Results.Forbid();
                 }
@@ -28,12 +28,15 @@ namespace AcsEmulatorAPI
                 {
                     CallConnectionProperties = new
                     {
-                        callConnection.Id,
+                        CallConnectionId = callConnection.Id,
+                        callConnection.AnsweredBy,
                         callConnection.CallConnectionState,
                         callConnection.CallbackUri,
                         callConnection.CorrelationId,
                         callConnection.ServerCallId,
+                        callConnection.Source,
                         callConnection.SourceCallerIdNumber,
+                        callConnection.SourceDisplayName,
                         Targets = callConnection.Targets.Select(x => new CommunicationIdentifier(x.RawId)).ToList()
                     }
                 };

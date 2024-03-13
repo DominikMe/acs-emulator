@@ -1,6 +1,7 @@
 ﻿#nullable disable
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AcsEmulatorAPI.Models
 {
@@ -9,8 +10,11 @@ namespace AcsEmulatorAPI.Models
         [Key]
         public Guid Id { get; set; }
 
+        public string AnsweredBy { get; set; }
+
         public CallConnectionState CallConnectionState { get; set; }
 
+        [Required]
         public string CallbackUri { get; set; }
 
         public string CognitiveServicesEndpoint { get; set; }
@@ -19,19 +23,21 @@ namespace AcsEmulatorAPI.Models
 
         public string ServerCallId { get; set; }
 
+        public string Source { get; set; }
+
         public string SourceCallerIdNumber { get; set; }
 
-        // TODO: Support PhoneNumber target
+        public string SourceDisplayName { get; set; }
+
+        [Required]
         public virtual ICollection<CallConnectionTarget> Targets { get; set; }
 
-        // TODO: Add these properties
-        //public CommunicationUser AnsweredBy { get; set; }
-
-        //public string Source { get; set; }
-
-        //public string SourceDisplayName { get; set; }
-
-        public static CallConnection CreateNew(string callbackUri, string sourceCallerIdNumber, string cognitiveServicesEndpoint = null)
+        public static CallConnection CreateNew(
+            string callbackUri,
+            string sourceCallerIdNumber,
+            string source = null,
+            string sourceCallerDisplayName = null,
+            string cognitiveServicesEndpoint = null)
         {
             return new CallConnection
             {
@@ -41,7 +47,9 @@ namespace AcsEmulatorAPI.Models
                 CognitiveServicesEndpoint = cognitiveServicesEndpoint,
                 CorrelationId = $"{Guid.NewGuid()}",
                 ServerCallId = $"{Guid.NewGuid()}",
+                Source = source,
                 SourceCallerIdNumber = sourceCallerIdNumber,
+                SourceDisplayName = sourceCallerDisplayName,
                 Targets = new List<CallConnectionTarget>()
             };
         }
@@ -52,6 +60,7 @@ namespace AcsEmulatorAPI.Models
             {
                 Id = Guid.NewGuid(),
                 RawId = x.CommunicationUser?.Id,
+                PhoneNumber = x.PhoneNumber?.Value,
                 CallConnection = this
             });
 
@@ -67,6 +76,8 @@ namespace AcsEmulatorAPI.Models
         public Guid Id { get; set; }
 
         public string RawId { get; set; }
+
+        public string PhoneNumber { get; set; }
 
         public virtual CallConnection CallConnection { get; set; }
     }
