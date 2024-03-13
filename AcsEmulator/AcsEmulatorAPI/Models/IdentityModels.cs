@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace AcsEmulatorAPI.Models
 {
-    record Identity(string id);
+    record IdentityId(string id);
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
     enum IdentityTokenScope
