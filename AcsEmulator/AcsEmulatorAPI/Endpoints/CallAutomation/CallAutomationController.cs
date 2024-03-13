@@ -1,5 +1,4 @@
 ﻿using AcsEmulatorAPI.Models;
-using Microsoft.IdentityModel.Tokens;
 
 namespace AcsEmulatorAPI.Endpoints.CallAutomation
 {
@@ -12,12 +11,7 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
             {
                 // MVP0: PhoneNumber places a call to a CommunicationUser
 
-                if (req.SourceCallerIdNumber == null || req.Targets.IsNullOrEmpty())
-                {
-                    return Results.Forbid();
-                }
-
-                var callConnection = CallConnection.CreateNew(req.CallbackUri, req.SourceCallerIdNumber.Value);
+                var callConnection = CallConnection.CreateNew(req.CallbackUri, req.SourceCallerIdNumber?.Value);
 
                 callConnection.AddTargets(req.Targets);
 

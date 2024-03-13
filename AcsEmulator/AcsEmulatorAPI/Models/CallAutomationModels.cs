@@ -6,14 +6,29 @@ namespace AcsEmulatorAPI.Models
     public record CreateCallRequest(
         string CallbackUri,
         List<CommunicationIdentifier> Targets,
-        CallIntelligenceOptions? CallIntelligenceOptions,
-        string? OperationContext,
-        CommunicationUser Source,
-        PhoneNumber? SourceCallerIdNumber,
-        string? SourceDisplayName
+        CallIntelligenceOptions? CallIntelligenceOptions = null,
+        string? OperationContext = null,
+        CommunicationUser? Source = null,
+        PhoneNumber? SourceCallerIdNumber = null,
+        string? SourceDisplayName = null
     );
 
     public record CallIntelligenceOptions(string CognitiveServicesEndpoint);
+
+    public record CallConnectionCreation(CallConnectionProperties CallConnectionProperties);
+
+    public record CallConnectionProperties(
+        Guid CallConnectionId,
+        string CallbackUri,
+        List<CommunicationIdentifier> Targets,
+        CallConnectionState CallConnection,
+        string? AnsweredBy,
+        string? CorrelationId,
+        string? ServerCallId,
+        string? Source,
+        string? SourceCallerIdNumber,
+        string? SourceDisplayName
+    );
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum CallConnectionState
