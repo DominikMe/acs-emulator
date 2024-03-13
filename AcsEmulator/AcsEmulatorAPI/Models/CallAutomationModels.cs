@@ -21,7 +21,7 @@ namespace AcsEmulatorAPI.Models
         Guid CallConnectionId,
         string CallbackUri,
         List<CommunicationIdentifier> Targets,
-        CallConnectionState CallConnection,
+        CallConnectionState CallConnectionState,
         string? AnsweredBy,
         string? CorrelationId,
         string? ServerCallId,
