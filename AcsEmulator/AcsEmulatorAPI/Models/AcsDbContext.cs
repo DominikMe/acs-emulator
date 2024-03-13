@@ -14,7 +14,9 @@ namespace AcsEmulatorAPI.Models
 
 		public DbSet<EmailMessage> EmailMessages { get; set; }
 
-		public AcsDbContext(DbContextOptions<AcsDbContext> options)
+        public DbSet<CallConnection> CallConnections { get; set; }
+
+        public AcsDbContext(DbContextOptions<AcsDbContext> options)
             : base(options)
         {
 
@@ -24,6 +26,7 @@ namespace AcsEmulatorAPI.Models
         {
             builder.Entity<ChatMessage>().ToTable("ChatMessages");
 			builder.Entity<AddParticipantsChatMessage>().ToTable("AddParticipantsChatMessages");
+            builder.Entity<CallConnectionTarget>().ToTable("CallConnectionTargets");
 
 			builder.Entity<ChatThread>()
                 .HasOne(t => t.CreatedBy)

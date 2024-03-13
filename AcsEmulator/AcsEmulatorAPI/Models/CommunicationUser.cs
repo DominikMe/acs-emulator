@@ -8,7 +8,10 @@
 
         // todo: support multiple identifier types
         public CommunicationUser CommunicationUser => new(RawId);
+
+        public PhoneNumber PhoneNumber { get; set; }
     }
 
     public record CommunicationUser(string Id);
+    public record PhoneNumber(string Value);
 }
