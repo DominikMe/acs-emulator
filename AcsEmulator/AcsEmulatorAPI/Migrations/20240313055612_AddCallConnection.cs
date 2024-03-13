@@ -16,12 +16,15 @@ namespace AcsEmulatorAPI.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    CallConnectionState = table.Column<int>(type: "INTEGER", nullable: false),
-                    CallbackUri = table.Column<string>(type: "TEXT", nullable: true),
+                    AnsweredBy = table.Column<string>(type: "TEXT", nullable: true),
+                    CallConnectionState = table.Column<string>(type: "TEXT", nullable: false),
+                    CallbackUri = table.Column<string>(type: "TEXT", nullable: false),
                     CognitiveServicesEndpoint = table.Column<string>(type: "TEXT", nullable: true),
                     CorrelationId = table.Column<string>(type: "TEXT", nullable: true),
                     ServerCallId = table.Column<string>(type: "TEXT", nullable: true),
-                    SourceCallerIdNumber = table.Column<string>(type: "TEXT", nullable: true)
+                    Source = table.Column<string>(type: "TEXT", nullable: true),
+                    SourceCallerIdNumber = table.Column<string>(type: "TEXT", nullable: true),
+                    SourceDisplayName = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -34,6 +37,7 @@ namespace AcsEmulatorAPI.Migrations
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     RawId = table.Column<string>(type: "TEXT", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "TEXT", nullable: true),
                     CallConnectionId = table.Column<Guid>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>

@@ -48,6 +48,10 @@ namespace AcsEmulatorAPI.Models
                     {
                         j.HasKey(uct => new { uct.UserId, uct.ChatThreadId });
                     });
+
+            builder.Entity<CallConnection>()
+                .Property(u => u.CallConnectionState)
+                .HasConversion<string>();
         }
     }
 }

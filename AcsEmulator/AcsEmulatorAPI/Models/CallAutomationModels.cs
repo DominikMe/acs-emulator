@@ -5,9 +5,12 @@ namespace AcsEmulatorAPI.Models
 {
     public record CreateCallRequest(
         string CallbackUri,
-        PhoneNumber SourceCallerIdNumber,
         List<CommunicationIdentifier> Targets,
-        CallIntelligenceOptions? CallIntelligenceOptions
+        CallIntelligenceOptions? CallIntelligenceOptions,
+        string? OperationContext,
+        CommunicationUser Source,
+        PhoneNumber? SourceCallerIdNumber,
+        string? SourceDisplayName
     );
 
     public record CallIntelligenceOptions(string CognitiveServicesEndpoint);

@@ -55,10 +55,15 @@ namespace AcsEmulatorAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("CallConnectionState")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("AnsweredBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CallConnectionState")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("CallbackUri")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("CognitiveServicesEndpoint")
@@ -70,7 +75,13 @@ namespace AcsEmulatorAPI.Migrations
                     b.Property<string>("ServerCallId")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Source")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("SourceCallerIdNumber")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SourceDisplayName")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -85,6 +96,9 @@ namespace AcsEmulatorAPI.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<Guid?>("CallConnectionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PhoneNumber")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("RawId")
