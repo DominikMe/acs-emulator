@@ -39,7 +39,7 @@ namespace AcsEmulatorAPI.Models
         CommunicationUser,
         [EnumMember(Value = "phoneNumber")]
         PhoneNumber,
-        [EnumMember(Value = "unkown")]
+        [EnumMember(Value = "unknown")]
         Unknown
     }
 
