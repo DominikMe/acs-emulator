@@ -1,6 +1,5 @@
 ﻿using AcsEmulatorAPI.Models;
-using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AcsEmulatorAPI.Endpoints.CallAutomation
 {
@@ -9,20 +8,36 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
     {
         public static void AddCallAutomationEndpoints(this WebApplication app)
         {
-            app.MapPost("/calling/callConnections", [Authorize] async (ClaimsPrincipal principal, AcsDbContext db, CreateCallRequest req) =>
+            app.MapPost("/calling/callConnections", async (AcsDbContext db, CreateCallRequest req) =>
             {
-                // todo: generate proper id, save to db
-                var callConnectionId = Guid.NewGuid().ToString();
+                // MVP0: PhoneNumber places a call to a CommunicationUser
+
+                if (req.Targets.IsNullOrEmpty())
+                {
+                    return Results.Forbid();
+                }
+
+                var callConnection = CallConnection.CreateNew(req.CallbackUri, req.SourceCallerIdNumber.Value);
+
+                callConnection.AddTargets(req.Targets);
+
+                await db.CallConnections.AddAsync(callConnection);
+                await db.SaveChangesAsync();
+
                 var result = new
                 {
                     CallConnectionProperties = new
                     {
-                        AnsweredBy = Guid.NewGuid(),
-                        CallConnectionId = callConnectionId,
-                        req.CallbackUri
+                        callConnection.Id,
+                        callConnection.CallConnectionState,
+                        callConnection.CallbackUri,
+                        callConnection.CorrelationId,
+                        callConnection.ServerCallId,
+                        callConnection.SourceCallerIdNumber,
+                        Targets = callConnection.Targets.Select(x => new CommunicationIdentifier(x.RawId)).ToList()
                     }
                 };
-                return Results.Created($"/calling/callConnections/{callConnectionId}", result);
+                return Results.Created($"/calling/callConnections/{callConnection.Id}", result);
             });
         }
     }
