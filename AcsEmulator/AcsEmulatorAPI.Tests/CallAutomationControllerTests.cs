@@ -17,7 +17,7 @@ namespace AcsEmulatorAPI.Tests
         }
 
         [TestMethod()]
-        public async Task AddCallAutomationEndpointsTest()
+        public async Task CreateCallConnectionTest()
         {
             // Arrange
             var sourceCallerIdNumber = new PhoneNumber("+19988877766");
@@ -27,7 +27,7 @@ namespace AcsEmulatorAPI.Tests
             // Act
             var response = await _client.PostAsJsonAsync(
                 "/calling/callConnections",
-                new CreateCallRequest(callbackUri, new List<CommunicationIdentifier> { target }) { SourceCallerIdNumber = sourceCallerIdNumber }
+                new CreateCallRequest(callbackUri, new List<CommunicationIdentifier> { target })  { SourceCallerIdNumber = sourceCallerIdNumber }
             );
 
             // Assert
@@ -37,6 +37,7 @@ namespace AcsEmulatorAPI.Tests
             var callConnectionCreation = await response.Content.ReadFromJsonAsync<CallConnectionCreation>();
             Assert.IsNotNull(callConnectionCreation);
             Assert.AreEqual(callbackUri, callConnectionCreation.CallConnectionProperties.CallbackUri);
+            Assert.AreEqual(CallConnectionState.Connecting, callConnectionCreation.CallConnectionProperties.CallConnectionState);
             Assert.AreEqual(target.RawId, callConnectionCreation.CallConnectionProperties.Targets.First().RawId);
             Assert.AreEqual(sourceCallerIdNumber.Value, callConnectionCreation.CallConnectionProperties.SourceCallerIdNumber);
         }
