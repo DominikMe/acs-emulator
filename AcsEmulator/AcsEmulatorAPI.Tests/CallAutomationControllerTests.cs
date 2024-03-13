@@ -19,14 +19,18 @@ namespace AcsEmulatorAPI.Tests
         [TestMethod()]
         public async Task AddCallAutomationEndpointsTest()
         {
-            // Create new CallConnection with one target
+            // Arrange
             var sourceCallerIdNumber = new PhoneNumber("+19988877766");
             var target = new CommunicationIdentifier("rawId");
             var callbackUri = "myCallback";
+
+            // Act
             var response = await _client.PostAsJsonAsync(
                 "/calling/callConnections",
                 new CreateCallRequest(callbackUri, new List<CommunicationIdentifier> { target }) { SourceCallerIdNumber = sourceCallerIdNumber }
             );
+
+            // Assert
             Assert.AreEqual(System.Net.HttpStatusCode.Created, response.StatusCode);
 
             Console.WriteLine(response.Content.ReadAsStringAsync().Result);
