@@ -21,7 +21,7 @@ const App = () => {
           <Route path='/ChatsUI' element={<ChatThreads/>}/>
           <Route path='/SMSUI' element={<SmsMessages/>}/>
           <Route path='/EmailUI' element={<EmailMessages/>}/>
-          <Route path='/PhoneUI' element={<Phone/>}/>
+          <Route path='/PhoneUI/*' element={<Phone/>}/>
         </Routes>
       </Stack>
     </>
