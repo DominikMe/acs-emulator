@@ -56,17 +56,16 @@ namespace AcsEmulatorAPI.Models
 
         public void AddTargets(IEnumerable<CommunicationIdentifier> targets)
         {
-            var callConnectionTargets = targets.Select(x => new CallConnectionTarget
+            foreach (var target in targets)
             {
-                Id = Guid.NewGuid(),
-                RawId = x.CommunicationUser?.Id,
-                PhoneNumber = x.PhoneNumber?.Value,
-                CallConnection = this
-            });
-
-            foreach (var target in callConnectionTargets)
-            {
-                Targets.Add(target);
+                var callConnectionTarget = new CallConnectionTarget
+                {
+                    Id = Guid.NewGuid(),
+                    RawId = target.CommunicationUser?.Id,
+                    PhoneNumber = target.PhoneNumber?.Value,
+                    CallConnection = this
+                };
+                Targets.Add(callConnectionTarget);
             }
         }
     }
