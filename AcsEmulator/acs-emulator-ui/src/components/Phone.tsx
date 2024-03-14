@@ -19,18 +19,18 @@ interface ActiveCall {
 }
 
 export const Phone = () => {
-  const [phoneConnection, setPhoneConnection] = useState<PhoneConnection | undefined>(undefined);
+  const phoneConnection = useRef<PhoneConnection | undefined>(undefined);
   const [dialedNumber, setDialedNumber] = useState<string | undefined>(undefined);
   const [activeCall, setActiveCall] = useState<ActiveCall | undefined>(undefined);
   const utterance = useRef<SpeechSynthesisUtterance | undefined>(undefined);
 
   useEffect(() => {
     (async () => {
-      const phoneConnection = await establishPhoneConnection(phoneNumber);
-      phoneConnection.webSocket.onmessage = (event) => {
+      const connection = await establishPhoneConnection(phoneNumber);
+      connection.webSocket.onmessage = (event) => {
         handleMessage(event);
       };
-      setPhoneConnection(phoneConnection);
+      phoneConnection.current = connection;
     })();
   }, []);
 
@@ -43,8 +43,15 @@ export const Phone = () => {
 
   const acceptCall = () => {
     // instantiate here because browsers require user interaction to create an utterance
-    
     utterance.current = new SpeechSynthesisUtterance();
+
+    const connection = phoneConnection.current;
+
+    if (connection!.webSocket.readyState !== WebSocket.OPEN) {
+      console.error('WebSocket not open');
+      return;
+    }
+    connection!.webSocket.send(JSON.stringify({ action: "acceptCall", content: "" }));
   };
 
   const rejectCall = () => {

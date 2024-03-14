@@ -4,9 +4,50 @@ using Microsoft.IdentityModel.Tokens;
 namespace AcsEmulatorAPI.Endpoints.CallAutomation
 {
     // https://github.com/Azure/azure-rest-api-specs/blob/main/specification/communication/data-plane/CallAutomation/stable/2023-10-15/communicationservicescallautomation.json
-    public static class CallAutomationController
+    public class CallAutomationController: IDisposable
     {
-        public static void AddCallAutomationEndpoints(this WebApplication app)
+        // need to figure out DI to make this less hacky, only setting with CreateCall route now
+        private AcsDbContext _dbContext;
+        private readonly CallAutomationWebSockets _sockets;
+        private readonly ILogger<Program> _logger;
+        private Dictionary<string, Guid> _connections = new();
+
+        public CallAutomationController(CallAutomationWebSockets sockets, ILogger<Program> logger)
+        {
+            _sockets = sockets;
+            _logger = logger;
+        }
+
+        public void ListenToIncomingMessages() => _sockets.OnIncomingMessage += HandleIncomingMessage;
+
+        public void Dispose() => _sockets.OnIncomingMessage -= HandleIncomingMessage;
+
+        public void HandleIncomingMessage(object _sender, IncomingMessageEventArgs ev)
+        {
+            _ = HandleAsync();
+
+            async Task HandleAsync()
+            {
+                switch (ev.Action)
+                {
+                    case "acceptCall":
+                        {
+                            if (_dbContext != null && _connections.TryGetValue(ev.From, out var connectionId))
+                            {
+                                var connection = await _dbContext.CallConnections.FindAsync(connectionId);
+                                if (connection != null)
+                                {
+                                    connection.CallConnectionState = CallConnectionState.Connected;
+                                    await _dbContext.SaveChangesAsync();
+                                }
+                            }
+                            break;
+                        }
+                }
+            }
+        }
+
+        public void AddEndpoints(WebApplication app)
         {
             string emulatorDeviceNumber = app.Configuration.GetValue<string>("EmulatorDevicePhoneNumber")!;
 
@@ -14,6 +55,7 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
             {
                 // MVP0: PhoneNumber places a call to a CommunicationUser
 
+                _dbContext = db;
                 var callConnection = CallConnection.CreateNew(req.CallbackUri, req.SourceCallerIdNumber?.Value);
 
                 callConnection.AddTargets(req.Targets);
@@ -42,6 +84,7 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
                 {
                     // place call to Emulator UI client
                     await sockets.MakePhoneCall(emulatorDeviceNumber, req.SourceCallerIdNumber?.Value, req.SourceDisplayName);
+                    _connections.Add(emulatorDeviceNumber, callConnection.Id);
                 }
 
                 return Results.Created($"/calling/callConnections/{callConnection.Id}", result);
