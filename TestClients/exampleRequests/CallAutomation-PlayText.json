@@ -9,10 +9,6 @@
         "voiceKind": "string",
         "voiceName": "string",
         "customVoiceEndpointId": "string"
-      },
-      "ssml": {
-        "ssmlText": "string",
-        "customVoiceEndpointId": "string"
       }
     }
   ],

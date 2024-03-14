@@ -4,7 +4,7 @@ import {
 } from '@fluentui/react';
 import { Dialpad } from '@azure/communication-react';
 import { PhoneConnection, establishPhoneConnection, raiseIncomingCallEvent } from '../services/phone';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Route, Routes } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 
@@ -19,10 +19,10 @@ interface ActiveCall {
 }
 
 export const Phone = () => {
-  const [getPhoneConnection, setPhoneConnection] = useState<PhoneConnection | undefined>(undefined);
-  const [getDialedNumber, setDialedNumber] = useState<string | undefined>(undefined);
-  const [getActiveCall, setActiveCall] = useState<ActiveCall | undefined>(undefined);
-  const [getUtterance, setUtterance] = useState<SpeechSynthesisUtterance | undefined>(undefined);
+  const [phoneConnection, setPhoneConnection] = useState<PhoneConnection | undefined>(undefined);
+  const [dialedNumber, setDialedNumber] = useState<string | undefined>(undefined);
+  const [activeCall, setActiveCall] = useState<ActiveCall | undefined>(undefined);
+  const utterance = useRef<SpeechSynthesisUtterance | undefined>(undefined);
 
   useEffect(() => {
     (async () => {
@@ -35,7 +35,7 @@ export const Phone = () => {
   }, []);
 
   const callNumber = () => {
-    const targetNumber = getDialedNumber;
+    const targetNumber = dialedNumber;
     if (targetNumber) {
       raiseIncomingCallEvent(phoneNumber, targetNumber);
     }
@@ -43,21 +43,22 @@ export const Phone = () => {
 
   const acceptCall = () => {
     // instantiate here because browsers require user interaction to create an utterance
-    setUtterance(new SpeechSynthesisUtterance('Call connected'));
+    
+    utterance.current = new SpeechSynthesisUtterance();
   };
 
   const rejectCall = () => {
   };
 
   const textToSpeech = (text: string) => {
-    const utterance = getUtterance;
-    if (!utterance) {
+    const utt = utterance.current;
+    if (!utt) {
       console.error('SpeechSynthesisUtterance not instantiated');
       return;
     }
-    utterance.text = text;
-    utterance.voice = speechSynthesis.getVoices()[0];
-    speechSynthesis.speak(utterance);
+    utt.text = text;
+    utt.voice = speechSynthesis.getVoices()[0];
+    speechSynthesis.speak(utt);
   }
 
   const handleMessage = (event: MessageEvent) => {
@@ -122,8 +123,8 @@ export const Phone = () => {
                   background: 'linear-gradient(to bottom right, turquoise, pink)'
                 }}>
                 <Stack.Item align="center">
-                  <h4>Call from {getActiveCall?.callerId}</h4>
-                  {!!getActiveCall?.callerDisplayName && <h2>{getActiveCall.callerDisplayName}</h2>}
+                  <h4>Call from {activeCall?.callerId}</h4>
+                  {!!activeCall?.callerDisplayName && <h2>{activeCall.callerDisplayName}</h2>}
                 </Stack.Item>
                 <Stack.Item align="center">
                   <IconButton
