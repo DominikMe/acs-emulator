@@ -69,6 +69,37 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
 
                 return Results.Accepted();
             });
+
+            app.MapGet("/calling/callConnections/{callConnectionId}", async (string callConnectionId, AcsDbContext db) =>
+            {
+                // Retrieve the CallConnection entity from the database based on the callConnectionId
+                var callConnection = await db.CallConnections.FindAsync(Guid.Parse(callConnectionId));
+
+                if (callConnection == null)
+                {
+                    // If the CallConnection entity is not found, return a 404 Not Found response
+                    return Results.NotFound("Call connection not found.");
+                }
+
+                // Return the CallConnection entity properties as the response
+                return Results.Ok(new
+                {
+                    callConnection.Id,
+                    callConnection.AnsweredBy,
+                    callConnection.CallConnectionState,
+                    callConnection.CallbackUri,
+                    callConnection.CorrelationId,
+                    callConnection.ServerCallId,
+                    callConnection.Source,
+                    callConnection.SourceCallerIdNumber,
+                    callConnection.SourceDisplayName,
+                    Targets = callConnection.Targets.Select(x => new CommunicationIdentifier(x.RawId)).ToArray()
+                });
+            });
+
+
+
+
         }
     }
 }
