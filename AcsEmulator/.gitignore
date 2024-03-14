@@ -455,3 +455,6 @@ $RECYCLE.BIN/
 
 # Our SQLite db
 AcsEmulator.db*
+
+# Self-signed certificate, please use the script to generate your own
+*.pfx

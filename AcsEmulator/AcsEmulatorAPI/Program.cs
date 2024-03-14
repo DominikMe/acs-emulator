@@ -24,7 +24,7 @@ builder.Services.AddDbContext<AcsDbContext>(options => options
 	.UseSqlite(connectionString));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-	.AddJwtBearer(o => o.TokenValidationParameters = UserToken.GetTokenValidationParameters(builder.Configuration["JwtSigningKey"]));
+	.AddJwtBearer(o => o.TokenValidationParameters = UserToken.GetTokenValidationParameters(builder.Configuration["JwtSigningKey"]!));
 
 // todo handle acsScope claim
 builder.Services.AddAuthorization();
@@ -60,8 +60,8 @@ builder.Services.AddSwaggerGen(options =>
 	});
 });
 
-builder.Services.AddSingleton(new Trouter());
-builder.Services.AddSingleton(new CallAutomationWebSockets());
+builder.Services.AddSingleton<Trouter>();
+builder.Services.AddSingleton<CallAutomationWebSockets>();
 
 if (!string.IsNullOrEmpty(builder.Configuration["EventGridSimulatorSystemTopicHostname"])
 	&&
@@ -112,7 +112,6 @@ otel.WithTracing(tracing =>
 });
 
 
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -142,8 +141,8 @@ app.AddSms();
 app.UseWebSockets();
 app.MapGroup("").MapEmailsApi();
 
-app.Services.GetService<Trouter>().AddEndpoints(app);
-app.Services.GetService<CallAutomationWebSockets>().AddEndpoints(app);
+app.Services.GetService<Trouter>()!.AddEndpoints(app);
+app.Services.GetService<CallAutomationWebSockets>()!.AddEndpoints(app);
 
 app.Run();
 

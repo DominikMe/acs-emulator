@@ -8,10 +8,16 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
     public class CallAutomationWebSockets
     {
         private Dictionary<string, WebSocket> _sockets = new();
+        private readonly ILogger<Program> _logger;
+
+        public CallAutomationWebSockets(ILogger<Program> logger)
+        {
+            this._logger = logger;
+        }
 
         public void AddEndpoints(WebApplication app)
         {
-            app.MapGet("/admin/callAutomation/sockets/{phoneNumber}", async (HttpContext context, string phoneNumber, ILogger<Program> log) =>
+            app.MapGet("/admin/callAutomation/sockets/{phoneNumber}", async (HttpContext context, string phoneNumber) =>
             {
                 if (!context.WebSockets.IsWebSocketRequest)
                     return Results.BadRequest();
@@ -19,13 +25,13 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
                 using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
                 _sockets.Add(phoneNumber, webSocket);
 
-                await Listen(webSocket, phoneNumber, log);
+                await Listen(webSocket, phoneNumber);
                 _sockets.Remove(phoneNumber);
 
                 return Results.Ok();
             }).RequireCors("websocketPolicy");
 
-            app.MapPost("/admin/callAutomation:raiseIncomingCallEvent", async (RaiseIncomingCallEvent req, IEventPublishingService eventPublisher, ILogger<Program> log) =>
+            app.MapPost("/admin/callAutomation:raiseIncomingCallEvent", async (RaiseIncomingCallEvent req, IEventPublishingService eventPublisher) =>
             {
                 try
                 {
@@ -33,23 +39,33 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
                 }
                 catch (Exception e)
                 {
-                    log.LogError(e, "Failed to raise IncomingCall event");
+                    _logger.LogError(e, "Failed to raise IncomingCall event");
                 }
 
                 return Results.Ok();
             });
         }
 
-        public async Task AnswerPhoneCall(string phoneNumber, string callerId, ILogger<Program> log) => await SendMessage(phoneNumber, callerId, JsonSerializer.Serialize(
+        public async Task MakePhoneCall(string phoneNumber, string callerId, string callerDisplayName) => await SendMessage(phoneNumber, callerId, JsonSerializer.Serialize(
+                    new
+                    {
+                        action = "incomingCall",
+                        time = DateTimeOffset.UtcNow.ToString("o"),
+                        callerId,
+                        callerDisplayName
+                    }
+                ));
+
+        public async Task AnswerPhoneCall(string phoneNumber, string callerId) => await SendMessage(phoneNumber, callerId, JsonSerializer.Serialize(
                     new
                     {
                         action = "answer",
                         time = DateTimeOffset.UtcNow.ToString("o"),
                         callerId,
                     }
-                ), log);
+                ));
 
-        public async Task PlayText(string phoneNumber, string callerId, string text, ILogger<Program> log) => await SendMessage(phoneNumber, callerId, JsonSerializer.Serialize(
+        public async Task PlayText(string phoneNumber, string callerId, string text) => await SendMessage(phoneNumber, callerId, JsonSerializer.Serialize(
                     new
                     {
                         action = "playText",
@@ -57,15 +73,15 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
                         callerId,
                         text
                     }
-                ), log);
+                ));
 
-        private async Task SendMessage(string phoneNumber, string callerId, string message, ILogger<Program> log)
+        private async Task SendMessage(string phoneNumber, string callerId, string message)
         {
             if (_sockets.TryGetValue(phoneNumber, out var socket))
             {
                 await SendMessage(socket, message);
             }
-            log.LogError("Failed to get active websocket for " + phoneNumber);
+            _logger.LogError("Failed to get active websocket for " + phoneNumber);
         }
 
         private static Task SendMessage(WebSocket webSocket, string message)
@@ -75,7 +91,7 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
                     true,
                     CancellationToken.None);
 
-        private async Task Listen(WebSocket webSocket, string phoneNumber, ILogger<Program> log)
+        private async Task Listen(WebSocket webSocket, string phoneNumber)
         {
             var buffer = new byte[1024 * 4];
             var receiveResult = await webSocket.ReceiveAsync(
@@ -86,7 +102,7 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
                 var received = Encoding.UTF8.GetString(buffer);
 
                 // todo: handle
-                log.LogInformation($"{phoneNumber} sent: {received}");
+                _logger.LogInformation($"{phoneNumber} sent: {received}");
 
                 Array.Clear(buffer, 0, buffer.Length);
                 receiveResult = await webSocket.ReceiveAsync(
