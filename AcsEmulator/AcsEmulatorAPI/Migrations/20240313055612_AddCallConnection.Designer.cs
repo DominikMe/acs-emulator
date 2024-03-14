@@ -3,6 +3,7 @@ using System;
 using AcsEmulatorAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AcsEmulatorAPI.Migrations
 {
     [DbContext(typeof(AcsDbContext))]
-    partial class AcsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240313055612_AddCallConnection")]
+    partial class AddCallConnection
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -175,7 +178,7 @@ namespace AcsEmulatorAPI.Migrations
                     b.ToTable("ChatThreads");
                 });
 
-            modelBuilder.Entity("AcsEmulatorAPI.Models.EmailMessageInternal", b =>
+            modelBuilder.Entity("AcsEmulatorAPI.Models.EmailMessage", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
@@ -357,7 +360,7 @@ namespace AcsEmulatorAPI.Migrations
 
             modelBuilder.Entity("AcsEmulatorAPI.Models.EmailMessageAttachment", b =>
                 {
-                    b.HasOne("AcsEmulatorAPI.Models.EmailMessageInternal", null)
+                    b.HasOne("AcsEmulatorAPI.Models.EmailMessage", null)
                         .WithMany("Attachments")
                         .HasForeignKey("EmailMessageId");
                 });
@@ -402,7 +405,7 @@ namespace AcsEmulatorAPI.Migrations
                     b.Navigation("UserChatThreads");
                 });
 
-            modelBuilder.Entity("AcsEmulatorAPI.Models.EmailMessageInternal", b =>
+            modelBuilder.Entity("AcsEmulatorAPI.Models.EmailMessage", b =>
                 {
                     b.Navigation("Attachments");
                 });

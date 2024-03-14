@@ -3,6 +3,7 @@ using System;
 using AcsEmulatorAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AcsEmulatorAPI.Migrations
 {
     [DbContext(typeof(AcsDbContext))]
-    partial class AcsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240312210807_ChangeChatSchema")]
+    partial class ChangeChatSchema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,68 +50,6 @@ namespace AcsEmulatorAPI.Migrations
                     b.HasIndex("ParticipantRawId");
 
                     b.ToTable("AddedParticipant");
-                });
-
-            modelBuilder.Entity("AcsEmulatorAPI.Models.CallConnection", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AnsweredBy")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CallConnectionState")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CallbackUri")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CognitiveServicesEndpoint")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CorrelationId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ServerCallId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Source")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("SourceCallerIdNumber")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("SourceDisplayName")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CallConnections");
-                });
-
-            modelBuilder.Entity("AcsEmulatorAPI.Models.CallConnectionTarget", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid?>("CallConnectionId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("RawId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CallConnectionId");
-
-                    b.ToTable("CallConnectionTargets", (string)null);
                 });
 
             modelBuilder.Entity("AcsEmulatorAPI.Models.ChatMessage", b =>
@@ -175,7 +116,7 @@ namespace AcsEmulatorAPI.Migrations
                     b.ToTable("ChatThreads");
                 });
 
-            modelBuilder.Entity("AcsEmulatorAPI.Models.EmailMessageInternal", b =>
+            modelBuilder.Entity("AcsEmulatorAPI.Models.EmailMessage", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
@@ -324,15 +265,6 @@ namespace AcsEmulatorAPI.Migrations
                     b.Navigation("Participant");
                 });
 
-            modelBuilder.Entity("AcsEmulatorAPI.Models.CallConnectionTarget", b =>
-                {
-                    b.HasOne("AcsEmulatorAPI.Models.CallConnection", "CallConnection")
-                        .WithMany("Targets")
-                        .HasForeignKey("CallConnectionId");
-
-                    b.Navigation("CallConnection");
-                });
-
             modelBuilder.Entity("AcsEmulatorAPI.Models.ChatMessage", b =>
                 {
                     b.HasOne("AcsEmulatorAPI.Models.ChatThread", null)
@@ -357,7 +289,7 @@ namespace AcsEmulatorAPI.Migrations
 
             modelBuilder.Entity("AcsEmulatorAPI.Models.EmailMessageAttachment", b =>
                 {
-                    b.HasOne("AcsEmulatorAPI.Models.EmailMessageInternal", null)
+                    b.HasOne("AcsEmulatorAPI.Models.EmailMessage", null)
                         .WithMany("Attachments")
                         .HasForeignKey("EmailMessageId");
                 });
@@ -390,11 +322,6 @@ namespace AcsEmulatorAPI.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("AcsEmulatorAPI.Models.CallConnection", b =>
-                {
-                    b.Navigation("Targets");
-                });
-
             modelBuilder.Entity("AcsEmulatorAPI.Models.ChatThread", b =>
                 {
                     b.Navigation("Messages");
@@ -402,7 +329,7 @@ namespace AcsEmulatorAPI.Migrations
                     b.Navigation("UserChatThreads");
                 });
 
-            modelBuilder.Entity("AcsEmulatorAPI.Models.EmailMessageInternal", b =>
+            modelBuilder.Entity("AcsEmulatorAPI.Models.EmailMessage", b =>
                 {
                     b.Navigation("Attachments");
                 });

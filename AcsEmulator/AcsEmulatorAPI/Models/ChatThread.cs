@@ -74,7 +74,7 @@ namespace AcsEmulatorAPI.Models
 
 					Sender = initiator,
 					Type = ChatMessageType.ParticipantAdded,
-					SequenceId = nextSequenceId,
+					SequenceId = nextSequenceId.ToString(),
 
 					AddedParticipants = new List<AddedParticipant>
 					{
@@ -86,7 +86,8 @@ namespace AcsEmulatorAPI.Models
 							ShareHistoryTime = requestParticipant.ShareHistoryTime,
 							DisplayName = requestParticipant.DisplayName
 						}
-					}
+					},
+					VersionId = "1"
 				};
 				Messages.Add(apm);
 

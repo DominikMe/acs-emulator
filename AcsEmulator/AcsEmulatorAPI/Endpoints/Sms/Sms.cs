@@ -1,6 +1,7 @@
-﻿using AcsEmulatorAPI.Models;
+﻿using AcsEmulatorAPI.Contracts.Services;
+using AcsEmulatorAPI.Models;
 
-namespace AcsEmulatorAPI
+namespace AcsEmulatorAPI.Endpoints.Sms
 {
     // https://github.com/Azure/azure-rest-api-specs/blob/main/specification/communication/data-plane/Sms/stable/2021-03-07/communicationservicessms.json
     // https://learn.microsoft.com/en-us/rest/api/communication/sms/send?tabs=HTTP
@@ -10,7 +11,7 @@ namespace AcsEmulatorAPI
         {
             var resourceId = app.Configuration["ResourceId"];
 
-            app.MapPost("/sms", async (AcsDbContext db, EventPublisher eventPublisher, SendMessageRequest req, ILogger<Program> log) =>
+            app.MapPost("/sms", async (AcsDbContext db, IEventPublishingService eventPublisher, SendMessageRequest req, ILogger<Program> log) =>
             {
                 var messagesToAdd = new List<SmsMessage>();
                 foreach (var recipient in req.SmsRecipients)
@@ -30,7 +31,7 @@ namespace AcsEmulatorAPI
                 {
                     try
                     {
-                        await eventPublisher.SendSmsDeliveryReport(message.From, message.To, message.Tag);
+                        await eventPublisher.SendEvent(SmsEvents.SmsDeliveryReport(message.From, message.To, message.Tag));
                     }
                     catch (Exception e)
                     {
@@ -45,6 +46,8 @@ namespace AcsEmulatorAPI
                     httpStatusCode = 202,
                     successful = true
                 });
+
+                log.LogInformation("Number of SMS sent: {0}", messages.Count());
 
                 return Results.Accepted(value: new
                 {
@@ -61,11 +64,11 @@ namespace AcsEmulatorAPI
                 });
             });
 
-            app.MapPost("/admin/sms:raiseSmsReceivedEvent", async (RaiseSmsReceivedEventRequest req, EventPublisher eventPublisher, ILogger<Program> log) =>
+            app.MapPost("/admin/sms:raiseSmsReceivedEvent", async (RaiseSmsReceivedEventRequest req, IEventPublishingService eventPublisher, ILogger<Program> log) =>
             {
                 try
                 {
-                    await eventPublisher.SendSmsReceivedEvent(req.From, req.To, req.Message);
+                    await eventPublisher.SendEvent(SmsEvents.SmsReceivedEvent(req.From, req.To, req.Message));
                 }
                 catch (Exception e)
                 {
@@ -85,7 +88,7 @@ namespace AcsEmulatorAPI
         record SmsRecipient(
             string To,
             string? RepeatabilityRequestId);
-            //DateTimeOffset? RepeatabilityFirstSent); todo: fix date parsing
+        //DateTimeOffset? RepeatabilityFirstSent); todo: fix date parsing
 
         record SmsSendOptions(bool EnableDeliveryReport, string Tag);
 

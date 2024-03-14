@@ -2,7 +2,7 @@
 
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using static AcsEmulatorAPI.Email;
+using static AcsEmulatorAPI.Endpoints.Email.Email;
 
 namespace AcsEmulatorAPI.Models
 {

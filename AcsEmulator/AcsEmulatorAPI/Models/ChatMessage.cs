@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace AcsEmulatorAPI.Models
 {
-	//[Table("ChatMessages")]
+	[Table("ChatMessages")]
 	public class ChatMessage
 	{
 		public Guid Id { get; set; }
@@ -17,7 +18,10 @@ namespace AcsEmulatorAPI.Models
 
 		public DateTimeOffset CreatedOn { get; set; } = DateTimeOffset.UtcNow;
 
-		public int SequenceId { get; set; }
+		// SequenceId is sent as String in (/chat/threads/{thread_id}/messages)
+		public string SequenceId { get; set; }
+
+		public string? VersionId { get; set; }
 	}
 
 	//[Table("AddParticipantsChatMessages")]
@@ -36,4 +40,5 @@ namespace AcsEmulatorAPI.Models
 
 		public DateTimeOffset? ShareHistoryTime { get; set; }
 	}
+
 }

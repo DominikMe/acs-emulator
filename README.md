@@ -44,6 +44,7 @@ dotnet tool install -g --add-source [downloadFolder] AcsEmulatorCLI --version [n
 * You can also use endpoint `https://localhost/` to run the Live Preview of the UI library's [Chat composite](https://azure.github.io/communication-ui-library/?path=/story/composites-chat-joinexistingchatthread--join-existing-chat-thread). First, create two users with tokens and use one of the users to create a chat thread with the other user. Then, you can open two tabs side by side and fill in the the respective user, token, thread id and endpoint for each.
 
 * You can browse the emulator data under `http://localhost:3000`
+    * Make sure `serve` is installed globally on your machine: `npm i -g serve`
 
 ![Emulator UI](./AcsEmulator/EmulatorUI.png)
 

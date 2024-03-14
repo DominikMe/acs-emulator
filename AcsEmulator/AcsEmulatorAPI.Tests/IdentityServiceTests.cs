@@ -3,30 +3,35 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net;
 using System.Net.Http.Json;
 
-
-
-namespace AcsEmulatorAPI
+namespace AcsEmulatorAPI.Tests
 {
     [TestClass()]
     public class IdentityServiceTests
     {
         private readonly WebApplicationFactory<Program> _factory;
+        private readonly HttpClient _client;
+
+
         public IdentityServiceTests()
         {
             _factory = new WebApplicationFactory<Program>();
+            _client = _factory.CreateClient();
         }
 
-        record TokenResponse(string token, string expiresOn);
+        [TestCleanup]
+        public void Cleanup()
+        {
+            _client.Dispose();
+        }
+
 
         // Since identities are stateful, this is more an end-to-end test than an unit one.
         // Having a class to represent identities and extract code outside of route mapping would help
         [TestMethod()]
-        public void AddIdentityTest()
+        public async Task AddIdentityTest()
         {
-            var client = _factory.CreateClient();
-
-            var response = client.PostAsJsonAsync("/identities/", new CreateIdentityRequest([IdentityTokenScope.Chat])).Result;
-            Console.WriteLine(response);
+            var response = await _client.PostAsJsonAsync("/identities/", new CreateIdentityRequest([IdentityTokenScope.Chat]));
+            //Console.WriteLine(response);
             Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
             var location = response.Headers.Location;
             Assert.IsNotNull(location);
@@ -34,10 +39,10 @@ namespace AcsEmulatorAPI
             Assert.IsTrue(location.ToString().StartsWith("/identities/8:acs:", StringComparison.InvariantCulture));
 
             // Now ask a Token on the 8:acs: identity
-            var token = client.PostAsJsonAsync(location + "/:issueAccessToken", new IssueTokenRequest([IdentityTokenScope.Chat], 60)).Result;
+            var token = await _client.PostAsJsonAsync(location + "/:issueAccessToken", new IssueTokenRequest([IdentityTokenScope.Chat], 60));
             Assert.AreEqual(HttpStatusCode.OK, token.StatusCode);
             //Console.WriteLine(token.Content.ReadAsStringAsync().Result);
-            TokenResponse? tokenResponse = token.Content.ReadFromJsonAsync<TokenResponse>().Result;
+            IdentityTokenResponse? tokenResponse = await token.Content.ReadFromJsonAsync<IdentityTokenResponse>();
 
             Assert.IsNotNull(tokenResponse);
             // Token should be a long string
@@ -49,15 +54,15 @@ namespace AcsEmulatorAPI
             Assert.IsTrue(expiresOn > utcNow.AddMinutes(58) && expiresOn < utcNow.AddMinutes(120));
 
             // Check the identity exists, using the emulator GET identity API
-            var identity = client.GetAsync(location).Result;
+            var identity = await _client.GetAsync(location);
             Assert.AreEqual(HttpStatusCode.OK, identity.StatusCode);
 
             // Now delete the identity (revoke token is a no-op for now, also issueAccessToken do not check id exists)
-            var deleteIdetity = client.DeleteAsync(location).Result;
+            var deleteIdetity = await _client.DeleteAsync(location);
             Assert.AreEqual(HttpStatusCode.NoContent, deleteIdetity.StatusCode);
 
             // Check the identity is gone, using the emulator GET identity API
-            var identity2 = client.GetAsync(location).Result;
+            var identity2 = await _client.GetAsync(location);
             Assert.AreEqual(HttpStatusCode.NotFound, identity2.StatusCode);
 
         }

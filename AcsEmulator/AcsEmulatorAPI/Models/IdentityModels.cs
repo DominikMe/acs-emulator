@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace AcsEmulatorAPI.Models
 {
-    record Identity(string id);
+    record IdentityId(string id);
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
     enum IdentityTokenScope
@@ -23,5 +23,9 @@ namespace AcsEmulatorAPI.Models
     record CreateIdentityRequest(IdentityTokenScope[]? createTokenWithScopes);
 
     record IssueTokenRequest(IdentityTokenScope[] scopes, int? expiresInMinutes);
+
+    // Response Type of /identity/{id}/:issueAccessToken
+    record IdentityTokenResponse(string token, string expiresOn);
+
 
 }
