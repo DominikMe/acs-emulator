@@ -1,0 +1,31 @@
+{
+  "playSources": [
+    {
+      "kind": "text",
+      "playSourceCacheId": "string",
+      "text": {
+        "text": "Hello! Would you like to confirm or cancel your reservation with Moe's Tavern tomorrow night at 7pm?",
+        "sourceLocale": "string",
+        "voiceKind": "string",
+        "voiceName": "string",
+        "customVoiceEndpointId": "string"
+      },
+      "ssml": {
+        "ssmlText": "string",
+        "customVoiceEndpointId": "string"
+      }
+    }
+  ],
+  "playTo": {
+    "kind": "phoneNumber",
+    "rawId": "string",
+    "phoneNumber": {
+      "value": "+12345556789"
+    }
+  },
+  "playOptions": {
+    "loop": true
+  },
+  "operationContext": "string",
+  "operationCallbackUri": "string"
+}

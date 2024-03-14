@@ -1,0 +1,23 @@
+{
+  "callbackUri": "string",
+  "targets": [
+    {
+      "kind": "phoneNumber",
+      "rawId": "string",
+      "phoneNumber": {
+        "value": "+12345556789"
+      }
+    }
+  ],
+  "callIntelligenceOptions": {
+    "cognitiveServicesEndpoint": "string"
+  },
+  "operationContext": "string",
+  "source": {
+    "id": "string"
+  },
+  "sourceCallerIdNumber": {
+    "value": "+1234555000"
+  },
+  "sourceDisplayName": "Moe's Tavern"
+}
