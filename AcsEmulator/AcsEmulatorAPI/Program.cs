@@ -1,5 +1,12 @@
 using AcsEmulatorAPI;
+using AcsEmulatorAPI.Contracts.Services;
+using AcsEmulatorAPI.Endpoints.CallAutomation;
+using AcsEmulatorAPI.Endpoints.Chat;
+using AcsEmulatorAPI.Endpoints.Email;
+using AcsEmulatorAPI.Endpoints.Identity;
+using AcsEmulatorAPI.Endpoints.Sms;
 using AcsEmulatorAPI.Models;
+using AcsEmulatorAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -55,10 +62,17 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddSingleton(new Trouter());
 builder.Services.AddSingleton(new CallAutomationWebSockets());
-builder.Services.AddSingleton(new EventPublisher(
-	builder.Configuration["EventGridSimulatorSystemTopicHostname"],
-	builder.Configuration["EventGridSimulatorSystemTopicCredentials"]));
 
+if (!string.IsNullOrEmpty(builder.Configuration["EventGridSimulatorSystemTopicHostname"])
+	&&
+	!string.IsNullOrEmpty(builder.Configuration["EventGridSimulatorSystemTopicCredentials"]))
+{
+	builder.Services.AddSingleton<IEventPublishingService, EventGridEventPublishingService>();
+}
+else
+{
+	builder.Services.AddSingleton<IEventPublishingService, LogEventPublishingService>();
+}
 
 // If using Jaeger, set the OpenTelemetryEndpointUrl environment variable to the Jaeger endpoint
 var tracingOtlpEndpoint = builder.Configuration["OpenTelemetryEndpointUrl"];

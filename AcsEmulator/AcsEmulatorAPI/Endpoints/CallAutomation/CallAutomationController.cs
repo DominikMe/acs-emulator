@@ -1,6 +1,6 @@
 ﻿using AcsEmulatorAPI.Models;
 
-namespace AcsEmulatorAPI
+namespace AcsEmulatorAPI.Endpoints.CallAutomation
 {
     // https://github.com/Azure/azure-rest-api-specs/blob/main/specification/communication/data-plane/CallAutomation/stable/2023-10-15/communicationservicescallautomation.json
     public static class CallAutomationController
