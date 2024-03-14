@@ -34,7 +34,7 @@ const string CancelText = """
 Your appointment tomorrow at 9am has been cancelled. Please call the bank directly 
 if you would like to rebook for another date and time.
 """;
-const string CustomerQueryTimeout = "I'm sorry I didn�t receive a response, please try again.";
+const string CustomerQueryTimeout = "I'm sorry I didn't receive a response, please try again.";
 const string NoResponse = "I didn't receive an input, we will go ahead and confirm your appointment. Goodbye";
 const string InvalidAudio = "I'm sorry, I didn't understand your response, please try again.";
 const string ConfirmChoiceLabel = "Confirm";
