@@ -8,19 +8,26 @@ import { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router';
 import { useNavigate } from 'react-router-dom';
 
-const phoneNumber = '+112345556789';
+const phoneNumber = '+12345556789';
 const acsPhoneNumber = '+1 (234) 555-000';
+
+interface ActiveCall { 
+  callerId: string,
+  callerDisplayName: string,
+  callState: "ringing" | "connected" | "terminated",
+  startTime: Date
+}
 
 export const Phone = () => {
   const [getPhoneConnection, setPhoneConnection] = useState<PhoneConnection | undefined>(undefined);
   const [getDialedNumber, setDialedNumber] = useState<string | undefined>(undefined);
+  const [getActiveCall, setActiveCall] = useState<ActiveCall | undefined>(undefined);
 
   useEffect(() => {
     (async () => {
       const phoneConnection = await establishPhoneConnection(phoneNumber);
       phoneConnection.webSocket.onmessage = (event) => {
-        const message = JSON.parse(event.data);
-        console.log(message);
+        handleMessage(event);
       };
       setPhoneConnection(phoneConnection);
     })();
@@ -30,6 +37,29 @@ export const Phone = () => {
     const targetNumber = getDialedNumber;
     if (targetNumber) {
       raiseIncomingCallEvent(phoneNumber, targetNumber);
+    }
+  };
+
+  const acceptCall = () => {
+  };
+
+  const rejectCall = () => {
+  };
+
+  const handleMessage = (event: MessageEvent) => {
+    const message = JSON.parse(event.data);
+    console.log(message);
+
+    switch (message.action) {
+      case 'incomingCall':
+        setActiveCall({
+          callerId: message.callerId,
+          callerDisplayName: message.callerDisplayName,
+          startTime: new Date(message.time),
+          callState: 'ringing'
+        });
+        navigate('/PhoneUI/incomingCall');
+        break;
     }
   };
 
@@ -75,7 +105,8 @@ export const Phone = () => {
                   background: 'linear-gradient(to bottom right, turquoise, pink)'
                 }}>
                 <Stack.Item align="center">
-                  <h3>Call from {acsPhoneNumber}</h3>
+                  <h4>Call from {getActiveCall?.callerId}</h4>
+                  {!!getActiveCall?.callerDisplayName && <h2>{getActiveCall.callerDisplayName}</h2>}
                 </Stack.Item>
                 <Stack.Item align="center">
                   <IconButton
@@ -106,7 +137,6 @@ export const Phone = () => {
         }}>
         <PivotItem itemIcon="Phone" headerText="Phone" itemKey="dialScreen" />
         <PivotItem itemIcon="OfficeChat" headerText="WhatsApp" itemKey="whatsApp" />
-        <PivotItem itemIcon="OfficeChat" headerText="IncomingCall" itemKey="incomingCall" />
       </Pivot>
     </Stack>
   );
