@@ -22,6 +22,7 @@ export const Phone = () => {
   const [getPhoneConnection, setPhoneConnection] = useState<PhoneConnection | undefined>(undefined);
   const [getDialedNumber, setDialedNumber] = useState<string | undefined>(undefined);
   const [getActiveCall, setActiveCall] = useState<ActiveCall | undefined>(undefined);
+  const [getUtterance, setUtterance] = useState<SpeechSynthesisUtterance | undefined>(undefined);
 
   useEffect(() => {
     (async () => {
@@ -41,10 +42,23 @@ export const Phone = () => {
   };
 
   const acceptCall = () => {
+    // instantiate here because browsers require user interaction to create an utterance
+    setUtterance(new SpeechSynthesisUtterance('Call connected'));
   };
 
   const rejectCall = () => {
   };
+
+  const textToSpeech = (text: string) => {
+    const utterance = getUtterance;
+    if (!utterance) {
+      console.error('SpeechSynthesisUtterance not instantiated');
+      return;
+    }
+    utterance.text = text;
+    utterance.voice = speechSynthesis.getVoices()[0];
+    speechSynthesis.speak(utterance);
+  }
 
   const handleMessage = (event: MessageEvent) => {
     const message = JSON.parse(event.data);
@@ -60,6 +74,9 @@ export const Phone = () => {
         });
         navigate('/PhoneUI/incomingCall');
         break;
+      case 'playText':
+        // todo: check that call is connected, skipping for now until we have the full client to service flow
+        textToSpeech(message.text);
     }
   };
 
@@ -73,7 +90,7 @@ export const Phone = () => {
   return (
     <Stack>
       <div style={{
-        width: '100%',
+        width: '400px',
         height: '50%',
         position: 'relative',
         margin: '0 auto',
@@ -113,7 +130,10 @@ export const Phone = () => {
                     iconProps={{iconName: "Phone"}}
                     title='Answer'
                     ariaLabel="Answer"
-                    styles={{ root: { width: '4rem', height: '4rem', padding: '0 auto' }, icon: { fontSize: '2rem', color: 'green' }}}>
+                    styles={{ root: { width: '4rem', height: '4rem', padding: '0 auto' }, icon: { fontSize: '2rem', color: 'green' }}}
+                    onClick={(ev) => {
+                      acceptCall();
+                    }}>
                     Answer
                   </IconButton>
                   <IconButton
