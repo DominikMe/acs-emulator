@@ -62,6 +62,7 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddSingleton<Trouter>();
 builder.Services.AddSingleton<CallAutomationWebSockets>();
+builder.Services.AddSingleton<CallAutomationController>();
 
 if (!string.IsNullOrEmpty(builder.Configuration["EventGridSimulatorSystemTopicHostname"])
 	&&
@@ -134,15 +135,18 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.AddIdentity();
-app.AddCallAutomationEndpoints();
 app.AddChatEndpoints();
 app.AddChatThreadEndpoints();
 app.AddSms();
-app.UseWebSockets();
+app.UseWebSockets(new WebSocketOptions
+{
+	KeepAliveInterval = TimeSpan.MaxValue
+});
 app.MapGroup("").MapEmailsApi();
 
 app.Services.GetService<Trouter>()!.AddEndpoints(app);
 app.Services.GetService<CallAutomationWebSockets>()!.AddEndpoints(app);
+app.Services.GetService<CallAutomationController>()!.AddEndpoints(app);
 
 app.Run();
 

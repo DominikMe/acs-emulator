@@ -10,6 +10,8 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
         private Dictionary<string, WebSocket> _sockets = new();
         private readonly ILogger<Program> _logger;
 
+        public event EventHandler<IncomingMessageEventArgs> OnIncomingMessage;
+
         public CallAutomationWebSockets(ILogger<Program> logger)
         {
             this._logger = logger;
@@ -104,6 +106,10 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
                 // todo: handle
                 _logger.LogInformation($"{phoneNumber} sent: {received}");
 
+                var message = JsonSerializer.Deserialize<IncomingMessage>(received);
+
+                OnIncomingMessage?.Invoke(this, new IncomingMessageEventArgs(phoneNumber, message));
+
                 Array.Clear(buffer, 0, buffer.Length);
                 receiveResult = await webSocket.ReceiveAsync(
                     new ArraySegment<byte>(buffer), CancellationToken.None);
@@ -117,4 +123,20 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
     }
 
     record RaiseIncomingCallEvent(string From, string To);
+
+    record IncomingMessage(string action, string content);
+
+    public class IncomingMessageEventArgs : EventArgs
+    {
+        internal IncomingMessageEventArgs(string from, IncomingMessage incomingMessage)
+        {
+            From = from;
+            Action = incomingMessage.action;
+            Content = incomingMessage.content;
+        }
+
+        public string From { get; set; }
+        public string Action { get; set; }
+        public string Content { get; set; }
+    }
 }
