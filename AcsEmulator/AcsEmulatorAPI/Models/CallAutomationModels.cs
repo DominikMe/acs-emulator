@@ -14,8 +14,6 @@ namespace AcsEmulatorAPI.Models
 
     public record CallIntelligenceOptions(string CognitiveServicesEndpoint);
 
-    public record CallConnectionCreation(CallConnectionProperties CallConnectionProperties);
-
     public record CallConnectionProperties(
         Guid CallConnectionId,
         string CallbackUri,
