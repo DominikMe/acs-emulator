@@ -51,7 +51,7 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
                                     connection.CallConnectionState = CallConnectionState.Connected;
                                     await dbContext.SaveChangesAsync();
 
-                                    _webhooks.SendCallConnectedEvent(new Uri(connection.CallbackUri), connection.Id.ToString());
+                                    await _webhooks.SendCallConnectedEventAsync(new Uri(connection.CallbackUri), connection.Id.ToString());
                                 }
                             }
                             break;
