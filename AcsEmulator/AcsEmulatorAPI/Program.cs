@@ -138,10 +138,7 @@ app.AddIdentity();
 app.AddChatEndpoints();
 app.AddChatThreadEndpoints();
 app.AddSms();
-app.UseWebSockets(new WebSocketOptions
-{
-	KeepAliveInterval = TimeSpan.MaxValue
-});
+app.UseWebSockets();
 app.MapGroup("").MapEmailsApi();
 
 app.Services.GetService<Trouter>()!.AddEndpoints(app);
