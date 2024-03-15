@@ -21,11 +21,11 @@ namespace AcsEmulatorAPI.Models
         string CallbackUri,
         List<CommunicationIdentifier> Targets,
         CallConnectionState CallConnectionState,
-        string? AnsweredBy,
+        CommunicationUser? AnsweredBy,
         string? CorrelationId,
         string? ServerCallId,
-        string? Source,
-        string? SourceCallerIdNumber,
+        CommunicationIdentifier? Source,
+        PhoneNumber? SourceCallerIdNumber,
         string? SourceDisplayName);
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
