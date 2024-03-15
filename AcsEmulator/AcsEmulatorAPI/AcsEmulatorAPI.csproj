@@ -7,6 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="ACSEmulatorAPI.Tests" />
+    <PackageReference Include="Azure.Communication.CallAutomation" Version="1.1.0" />
     <PackageReference Include="Azure.Messaging.EventGrid" Version="4.23.0" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.7.0" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.7.0" />
