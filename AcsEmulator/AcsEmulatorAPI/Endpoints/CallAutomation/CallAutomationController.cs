@@ -80,22 +80,18 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
                 await db.CallConnections.AddAsync(callConnection);
                 await db.SaveChangesAsync();
 
-                var result = new
-                {
-                    CallConnectionProperties = new
-                    {
-                        CallConnectionId = callConnection.Id,
-                        callConnection.AnsweredBy,
-                        callConnection.CallConnectionState,
-                        callConnection.CallbackUri,
-                        callConnection.CorrelationId,
-                        callConnection.ServerCallId,
-                        callConnection.Source,
-                        callConnection.SourceCallerIdNumber,
-                        callConnection.SourceDisplayName,
-                        Targets = callConnection.Targets.Select(x => new CommunicationIdentifier(x.RawId)).ToList()
-                    }
-                };
+                var result = new CallConnectionProperties(
+                    callConnection.Id,
+                    callConnection.CallbackUri,
+                    callConnection.Targets.Select(x => new CommunicationIdentifier(new PhoneNumber(x.PhoneNumber))).ToList(),
+                    callConnection.CallConnectionState,
+                    callConnection.AnsweredBy != null ? new CommunicationUser(callConnection.AnsweredBy) : null,
+                    callConnection.CorrelationId,
+                    callConnection.ServerCallId,
+                    callConnection.Source != null ? new CommunicationIdentifier(callConnection.Source) : null,
+                    callConnection.SourceCallerIdNumber != null ? new PhoneNumber(callConnection.SourceCallerIdNumber) : null,
+                    callConnection.SourceDisplayName
+                );
 
                 if (ContainsEmulatorDeviceNumber(req.Targets))
                 {

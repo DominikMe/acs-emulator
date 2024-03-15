@@ -21,7 +21,8 @@ namespace AcsEmulatorAPI.Tests
         {
             // Arrange
             var sourceCallerIdNumber = new PhoneNumber("+19988877766");
-            var target = new CommunicationIdentifier("rawId");
+            var targetPhoneNumber = new PhoneNumber("+17781234567");
+            var target = new CommunicationIdentifier(targetPhoneNumber);
             var callbackUri = "myCallback";
 
             // Act
@@ -34,12 +35,12 @@ namespace AcsEmulatorAPI.Tests
             Assert.AreEqual(System.Net.HttpStatusCode.Created, response.StatusCode);
 
             Console.WriteLine(response.Content.ReadAsStringAsync().Result);
-            var callConnectionCreation = await response.Content.ReadFromJsonAsync<CallConnectionCreation>();
-            Assert.IsNotNull(callConnectionCreation);
-            Assert.AreEqual(callbackUri, callConnectionCreation.CallConnectionProperties.CallbackUri);
-            Assert.AreEqual(CallConnectionState.Connecting, callConnectionCreation.CallConnectionProperties.CallConnectionState);
-            Assert.AreEqual(target.RawId, callConnectionCreation.CallConnectionProperties.Targets.First().RawId);
-            Assert.AreEqual(sourceCallerIdNumber.Value, callConnectionCreation.CallConnectionProperties.SourceCallerIdNumber);
+            var callConnectionProperties = await response.Content.ReadFromJsonAsync<CallConnectionProperties>();
+            Assert.IsNotNull(callConnectionProperties);
+            Assert.AreEqual(callbackUri, callConnectionProperties.CallbackUri);
+            Assert.AreEqual(CallConnectionState.Connecting, callConnectionProperties.CallConnectionState);
+            Assert.AreEqual(target.RawId, callConnectionProperties.Targets.First().RawId);
+            Assert.AreEqual(sourceCallerIdNumber.Value, callConnectionProperties.SourceCallerIdNumber?.Value);
         }
     }
 }
