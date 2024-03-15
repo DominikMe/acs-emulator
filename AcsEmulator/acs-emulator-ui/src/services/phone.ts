@@ -25,7 +25,7 @@ export class PhoneConnection {
   async establishConnection(): Promise<WebSocket> {
     return new Promise((resolve, reject) => {
       this.webSocket.onopen = () => {
-        setInterval(this.keepAlive.bind(this), 5000);
+        console.log('WebSocket open');
         resolve(this.webSocket);
       }
 
@@ -37,16 +37,6 @@ export class PhoneConnection {
         console.log('WebSocket closed', event);
       }
     });
-  }
-
-  async keepAlive(): Promise<void> {
-    console.log("keep websocket alive");
-    if (this.webSocket.readyState === WebSocket.OPEN) {
-      this.webSocket.send(JSON.stringify({ action: "keepAlive", content: "" }));
-    }
-    else {
-      console.error('WebSocket not open');
-    }
   }
 }
 
