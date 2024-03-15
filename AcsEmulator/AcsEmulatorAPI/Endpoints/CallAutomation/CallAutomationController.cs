@@ -118,13 +118,42 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
                     return Results.NotFound();
                 };
 
-                // todo: check that connection state is "connected" - skipping for now because we haven't wired up the accept call from emulator phone client flow
+                if (connection.CallConnectionState != CallConnectionState.Connected)
+                {
+                    return Results.StatusCode(412);
+                }
 
                 List<TextSource> textSources = req.playSources?.Where(x => x.kind == PlaySourceType.Text && x.text is not null).Select(x => x.text).Cast<TextSource>().ToList();
                 if (req.playTo.PhoneNumber?.Value == emulatorDeviceNumber && !textSources.IsNullOrEmpty())
                 {
                     // tell Emulator UI client to synthesize text - real ACS will send audio, for our emulator the Browser's built-in speech APIs have to do
                     await sockets.PlayText(emulatorDeviceNumber, connection.SourceCallerIdNumber, textSources!.First().text);
+                }
+
+                return Results.Accepted();
+            });
+
+            app.MapPost("/calling/callConnections/{callConnectionId}:recognize", async (AcsDbContext db, CallAutomationWebSockets sockets, string callConnectionId, RecognizeRequest req) =>
+            {
+                var connection = await db.CallConnections.FindAsync(Guid.Parse(callConnectionId));
+                if (connection is null)
+                {
+                    // todo: validate what ACS is really returning in this case
+                    return Results.NotFound();
+                };
+
+                if (connection.CallConnectionState != CallConnectionState.Connected)
+                {
+                    return Results.StatusCode(412);
+                }
+
+                if (req.recognizeOptions.targetParticipant.PhoneNumber?.Value == emulatorDeviceNumber)
+                {
+                    string prompt = (req.playPrompt.kind == PlaySourceType.Text)
+                        ? req.playPrompt.text.text
+                        : "";
+                    // tell Emulator UI client to recognize speech - real ACS will receive audio, for our emulator the Browser's built-in speech APIs have to do
+                    await sockets.RecognizeSpeech(emulatorDeviceNumber, connection.SourceCallerIdNumber, prompt);
                 }
 
                 return Results.Accepted();

@@ -77,6 +77,16 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
                     }
                 ));
 
+        public async Task RecognizeSpeech(string phoneNumber, string callerId, string prompt) => await SendMessage(phoneNumber, callerId, JsonSerializer.Serialize(
+                    new
+                    {
+                        action = "recognizeSpeech",
+                        time = DateTimeOffset.UtcNow.ToString("o"),
+                        callerId,
+                        prompt
+                    }
+                ));
+
         private async Task SendMessage(string phoneNumber, string callerId, string message)
         {
             if (_sockets.TryGetValue(phoneNumber, out var socket))

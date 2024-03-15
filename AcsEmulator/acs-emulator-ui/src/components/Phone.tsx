@@ -72,6 +72,14 @@ export const Phone = () => {
     speechSynthesis.speak(utt);
   }
 
+  const recognizeSpeech = (prompt: string) => {
+    if (!!prompt) {
+      textToSpeech(prompt);
+    }
+    
+    // to do - implement speech recognition, see https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API/Using_the_Web_Speech_API
+  }
+
   const handleMessage = (event: MessageEvent) => {
     const message = JSON.parse(event.data);
     console.log(message);
@@ -89,6 +97,11 @@ export const Phone = () => {
       case 'playText':
         // todo: check that call is connected, skipping for now until we have the full client to service flow
         textToSpeech(message.text);
+        break;
+      case 'recognizeSpeech':
+          // todo: check that call is connected, skipping for now until we have the full client to service flow
+          recognizeSpeech(message.prompt);
+          break;
     }
   };
 
