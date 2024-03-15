@@ -1,4 +1,5 @@
 ﻿using AcsEmulatorAPI.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace AcsEmulatorAPI.Endpoints.CallAutomation
@@ -6,16 +7,18 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
     // https://github.com/Azure/azure-rest-api-specs/blob/main/specification/communication/data-plane/CallAutomation/stable/2023-10-15/communicationservicescallautomation.json
     public class CallAutomationController: IDisposable
     {
-        // need to figure out DI to make this less hacky, only setting with CreateCall route now
-        private AcsDbContext _dbContext;
+        private readonly IDbContextFactory<AcsDbContext> _dbContextFactory;
         private readonly CallAutomationWebSockets _sockets;
         private readonly ILogger<Program> _logger;
         private Dictionary<string, Guid> _connections = new();
 
-        public CallAutomationController(CallAutomationWebSockets sockets, ILogger<Program> logger)
+        public CallAutomationController(IDbContextFactory<AcsDbContext> dbContextFactory, CallAutomationWebSockets sockets, ILogger<Program> logger)
         {
+            _dbContextFactory = dbContextFactory;
             _sockets = sockets;
             _logger = logger;
+
+            ListenToIncomingMessages();
         }
 
         public void ListenToIncomingMessages() => _sockets.OnIncomingMessage += HandleIncomingMessage;
@@ -28,23 +31,39 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
 
             async Task HandleAsync()
             {
+                using var dbContext = _dbContextFactory.CreateDbContext();
                 switch (ev.Action)
                 {
                     case "acceptCall":
                         {
-                            if (_dbContext != null && _connections.TryGetValue(ev.From, out var connectionId))
+                            if (_connections.TryGetValue(ev.From, out var connectionId))
                             {
-                                var connection = await _dbContext.CallConnections.FindAsync(connectionId);
+                                var connection = await dbContext.CallConnections.FindAsync(connectionId);
                                 if (connection != null)
                                 {
                                     connection.CallConnectionState = CallConnectionState.Connected;
-                                    await _dbContext.SaveChangesAsync();
+                                    await dbContext.SaveChangesAsync();
+                                }
+                            }
+                            break;
+                        }
+                    case "declineCall":
+                        {
+                            if (_connections.TryGetValue(ev.From, out var connectionId))
+                            {
+                                var connection = await dbContext.CallConnections.FindAsync(connectionId);
+                                if (connection != null)
+                                {
+                                    connection.CallConnectionState = CallConnectionState.Disconnected;
+                                    await dbContext.SaveChangesAsync();
                                 }
                             }
                             break;
                         }
                 }
             }
+
+            AcsDbContext CreateDbContext() => _dbContextFactory.CreateDbContext();
         }
 
         public void AddEndpoints(WebApplication app)
@@ -54,8 +73,6 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
             app.MapPost("/calling/callConnections", async (AcsDbContext db, CallAutomationWebSockets sockets, CreateCallRequest req) =>
             {
                 // MVP0: PhoneNumber places a call to a CommunicationUser
-
-                _dbContext = db;
                 var callConnection = CallConnection.CreateNew(req.CallbackUri, req.SourceCallerIdNumber?.Value);
 
                 callConnection.AddTargets(req.Targets);
@@ -139,10 +156,6 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
                     Targets = callConnection.Targets.Select(x => new CommunicationIdentifier(x.RawId)).ToArray()
                 });
             });
-
-
-
-
         }
     }
 }

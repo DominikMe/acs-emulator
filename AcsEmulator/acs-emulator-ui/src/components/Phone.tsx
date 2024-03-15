@@ -45,16 +45,20 @@ export const Phone = () => {
     // instantiate here because browsers require user interaction to create an utterance
     utterance.current = new SpeechSynthesisUtterance();
 
-    const connection = phoneConnection.current;
+    sendWebsocketMessage({ action: "acceptCall", content: "" });
+  };
 
+  const declineCall = () => {
+    sendWebsocketMessage({ action: "declineCall", content: "" });
+  };
+
+  const sendWebsocketMessage = (message: { action: string, content: string }) => {
+    const connection = phoneConnection.current;
     if (connection!.webSocket.readyState !== WebSocket.OPEN) {
       console.error('WebSocket not open');
       return;
     }
-    connection!.webSocket.send(JSON.stringify({ action: "acceptCall", content: "" }));
-  };
-
-  const rejectCall = () => {
+    connection!.webSocket.send(JSON.stringify(message));
   };
 
   const textToSpeech = (text: string) => {
@@ -148,7 +152,10 @@ export const Phone = () => {
                     iconProps={{iconName: "DeclineCall"}}
                     title='Decline'
                     ariaLabel="Decline"
-                    styles={{ root: { width: '4rem', height: '4rem',  padding: '0 auto' }, icon: { fontSize: '2rem', color: 'red' }}}>
+                    styles={{ root: { width: '4rem', height: '4rem',  padding: '0 auto' }, icon: { fontSize: '2rem', color: 'red' }}}
+                    onClick={(ev) => {
+                      declineCall();
+                    }}>
                     Decline
                   </IconButton>
                 </Stack.Item>
