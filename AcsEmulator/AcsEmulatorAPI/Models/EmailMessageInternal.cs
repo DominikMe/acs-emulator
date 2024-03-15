@@ -6,7 +6,7 @@ using static AcsEmulatorAPI.Endpoints.Email.Email;
 
 namespace AcsEmulatorAPI.Models
 {
-    public class EmailMessage
+	public class EmailMessageInternal
 	{
 		public string Id { get; set; }
 
@@ -36,9 +36,9 @@ namespace AcsEmulatorAPI.Models
 
 		public virtual ICollection<EmailMessageAttachment> Attachments { get; set; }
 
-		internal static EmailMessage FromApiModel(SendEmailRequest emailRequest, string operationId) => EmailMessageExtensions.FromApiModel(emailRequest, operationId);
+		internal static EmailMessageInternal FromApiModel(EmailMessage emailRequest, string operationId) => EmailMessageExtensions.FromApiModel(emailRequest, operationId);
 
-		internal static SendEmailRequest ToApiModel(EmailMessage emailMessage) => EmailMessageExtensions.ToApiModel(emailMessage);
+		internal static EmailMessage ToApiModel(EmailMessageInternal emailMessage) => EmailMessageExtensions.ToApiModel(emailMessage);
 
 	}
 
@@ -55,7 +55,7 @@ namespace AcsEmulatorAPI.Models
 
 	static partial class EmailMessageExtensions
 	{
-		internal static EmailMessage FromApiModel(SendEmailRequest emailRequest, string operationId) => new()
+		internal static EmailMessageInternal FromApiModel(EmailMessage emailRequest, string operationId) => new()
 		{
 			Id = Guid.NewGuid().ToString(),
 			OperationId = operationId,
@@ -63,26 +63,26 @@ namespace AcsEmulatorAPI.Models
 			Subject = emailRequest.content.subject,
 			PlainText = emailRequest.content.plainText,
 			Html = emailRequest.content.html,
-			From = emailRequest.senderEmail,
+			From = emailRequest.senderAddress,
 			To = string.Join(",", emailRequest.recipients.to?.Select(SerializeRecipient) ?? Array.Empty<string>()),
 			Cc = string.Join(",", emailRequest.recipients.cc?.Select(SerializeRecipient) ?? Array.Empty<string>()),
 			Bcc = string.Join(",", emailRequest.recipients.bcc?.Select(SerializeRecipient) ?? Array.Empty<string>()),
 			ReplyTo = string.Join(",", emailRequest.replyTo?.Select(SerializeRecipient) ?? Array.Empty<string>()),
 			Headers = JsonSerializer.Serialize(emailRequest.headers),
-			DisableUserEngagementTracking = emailRequest.disableUserEngagementTracking,
+			DisableUserEngagementTracking = emailRequest.userEngagementTrackingDisabled,
 			Attachments = emailRequest.attachments?.Select(x => new EmailMessageAttachment
 			{
 				Id = Guid.NewGuid().ToString(),
 				Name = x.name,
 				Type = x.type,
-				ContentBytesBase64 = x.contentBytesBase64
+				ContentBytesBase64 = x.contentInBase64
 			}).ToArray() ?? Array.Empty<EmailMessageAttachment>()
 		};
 
 		// lossy, loses attachment ids
-		internal static SendEmailRequest ToApiModel(EmailMessage emailMessage) => new SendEmailRequest(
+		internal static EmailMessage ToApiModel(EmailMessageInternal emailMessage) => new EmailMessage(
 				headers: emailMessage.Headers == null ? null : JsonSerializer.Deserialize<Dictionary<string, string>>(emailMessage.Headers),
-				senderEmail: emailMessage.From,
+				senderAddress: emailMessage.From,
 				content: new EmailContent(emailMessage.Subject, emailMessage.PlainText, emailMessage.Html),
 				recipients: new EmailRecipients(
 					to: emailMessage.To.Split(",").Select(DeserializeRecipient).ToArray(),
@@ -90,15 +90,15 @@ namespace AcsEmulatorAPI.Models
 					bcc: emailMessage.Bcc.Split(",").Select(DeserializeRecipient).ToArray()),
 				replyTo: emailMessage.ReplyTo.Split(",").Select(DeserializeRecipient).ToArray(),
 				attachments: emailMessage.Attachments.Select(x => new EmailAttachment(x.Name, x.Type, x.ContentBytesBase64)).ToArray(),
-				disableUserEngagementTracking: emailMessage.DisableUserEngagementTracking
+				userEngagementTrackingDisabled: emailMessage.DisableUserEngagementTracking
 				);
 
-		private static string SerializeRecipient(EmailRecipient recipient) => $"{recipient.displayName}<{recipient.email}>";
+		private static string SerializeRecipient(EmailAddress recipient) => $"{recipient.displayName}<{recipient.address}>";
 
-		private static EmailRecipient DeserializeRecipient(string recipient)
+		private static EmailAddress DeserializeRecipient(string recipient)
 		{
 			var match = RecipientRegex().Match(recipient);
-			return new EmailRecipient(match.Groups["email"].Value, match.Groups["displayName"].Value);
+			return new EmailAddress(match.Groups["email"].Value, match.Groups["displayName"].Value);
 		}
 
 		[GeneratedRegex("^(?<displayName>[^<]*(?<emailName><.+>))$", RegexOptions.Compiled | RegexOptions.Singleline)]

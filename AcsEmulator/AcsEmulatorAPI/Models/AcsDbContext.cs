@@ -12,7 +12,7 @@ namespace AcsEmulatorAPI.Models
 
         public DbSet<SmsMessage> SmsMessages { get; set; }
 
-		public DbSet<EmailMessage> EmailMessages { get; set; }
+		public DbSet<EmailMessageInternal> EmailMessages { get; set; }
 
         public DbSet<CallConnection> CallConnections { get; set; }
 

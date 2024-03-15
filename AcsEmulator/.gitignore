@@ -457,4 +457,5 @@ $RECYCLE.BIN/
 AcsEmulator.db*
 
 # Self-signed certificate, please use the script to generate your own
-*.pfx
+acsEmulator_SelfSigned.pfx
+
