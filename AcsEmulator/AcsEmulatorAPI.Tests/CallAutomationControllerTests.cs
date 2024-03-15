@@ -35,12 +35,12 @@ namespace AcsEmulatorAPI.Tests
             Assert.AreEqual(System.Net.HttpStatusCode.Created, response.StatusCode);
 
             Console.WriteLine(response.Content.ReadAsStringAsync().Result);
-            var callConnectionCreation = await response.Content.ReadFromJsonAsync<CallConnectionProperties>();
-            Assert.IsNotNull(callConnectionCreation);
-            Assert.AreEqual(callbackUri, callConnectionCreation.CallbackUri);
-            Assert.AreEqual(CallConnectionState.Connecting, callConnectionCreation.CallConnectionState);
-            Assert.AreEqual(target.RawId, callConnectionCreation.Targets.First().RawId);
-            Assert.AreEqual(sourceCallerIdNumber.Value, callConnectionCreation.SourceCallerIdNumber?.Value);
+            var callConnectionProperties = await response.Content.ReadFromJsonAsync<CallConnectionProperties>();
+            Assert.IsNotNull(callConnectionProperties);
+            Assert.AreEqual(callbackUri, callConnectionProperties.CallbackUri);
+            Assert.AreEqual(CallConnectionState.Connecting, callConnectionProperties.CallConnectionState);
+            Assert.AreEqual(target.RawId, callConnectionProperties.Targets.First().RawId);
+            Assert.AreEqual(sourceCallerIdNumber.Value, callConnectionProperties.SourceCallerIdNumber?.Value);
         }
     }
 }
