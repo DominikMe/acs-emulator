@@ -19,9 +19,14 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
 var connectionString = builder.Configuration.GetConnectionString("EmulatorDb");
-builder.Services.AddDbContext<AcsDbContext>(options => options
-	.UseLazyLoadingProxies()
-	.UseSqlite(connectionString));
+builder.Services.AddDbContextFactory<AcsDbContext>(options => options
+    .UseLazyLoadingProxies()
+    .UseSqlite(connectionString));
+
+builder.Services.AddScoped((provider)
+	=> provider
+	.GetService<IDbContextFactory<AcsDbContext>>()
+	.CreateDbContext());
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 	.AddJwtBearer(o => o.TokenValidationParameters = UserToken.GetTokenValidationParameters(builder.Configuration["JwtSigningKey"]!));
