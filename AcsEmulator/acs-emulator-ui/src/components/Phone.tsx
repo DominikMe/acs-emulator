@@ -11,6 +11,13 @@ import { useNavigate } from 'react-router-dom';
 const phoneNumber = '+12345556789';
 const acsPhoneNumber = '+1 (234) 555-000';
 
+const SpeechRecognition =
+  window.SpeechRecognition || window.webkitSpeechRecognition;
+const SpeechGrammarList =
+  window.SpeechGrammarList || window.webkitSpeechGrammarList;
+const SpeechRecognitionEvent =
+  window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent;
+
 interface ActiveCall { 
   callerId: string,
   callerDisplayName: string,
@@ -18,11 +25,17 @@ interface ActiveCall {
   startTime: Date
 }
 
+interface Choice {
+  tone: string,
+  phrases: string[]
+};
+
 export const Phone = () => {
   const phoneConnection = useRef<PhoneConnection | undefined>(undefined);
   const [dialedNumber, setDialedNumber] = useState<string | undefined>(undefined);
   const [activeCall, setActiveCall] = useState<ActiveCall | undefined>(undefined);
   const utterance = useRef<SpeechSynthesisUtterance | undefined>(undefined);
+  const recognition = useRef<SpeechRecognition | undefined>(undefined);
 
   useEffect(() => {
     (async () => {
@@ -44,6 +57,7 @@ export const Phone = () => {
   const acceptCall = () => {
     // instantiate here because browsers require user interaction to create an utterance
     utterance.current = new SpeechSynthesisUtterance();
+    recognition.current = new SpeechRecognition();
 
     sendWebsocketMessage({ action: "acceptCall", content: "" });
   };
@@ -61,23 +75,62 @@ export const Phone = () => {
     connection!.webSocket.send(JSON.stringify(message));
   };
 
-  const textToSpeech = (text: string) => {
+  const textToSpeech = (text: string): Promise<void> => {
     const utt = utterance.current;
     if (!utt) {
       console.error('SpeechSynthesisUtterance not instantiated');
-      return;
+      return Promise.resolve();
     }
-    utt.text = text;
-    utt.voice = speechSynthesis.getVoices()[0];
-    speechSynthesis.speak(utt);
+
+    return new Promise<void>((resolve, reject) => {
+      utt.text = text;
+      utt.voice = speechSynthesis.getVoices()[0];
+
+      utt.onend = () => {
+        return resolve();
+      }
+      utt.onerror = (err) => {
+        return reject(err);
+      }
+
+      speechSynthesis.speak(utt);
+    });
   }
 
-  const recognizeSpeech = (prompt: string) => {
-    if (!!prompt) {
-      textToSpeech(prompt);
+  const recognizeSpeech = async (choices: Choice[], prompt: string): Promise<void> => {
+    const rec = recognition.current;
+    if (!rec) {
+      console.error('SpeechRecognition not instantiated');
+      return;
     }
-    
-    // to do - implement speech recognition, see https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API/Using_the_Web_Speech_API
+    const speechRecognitionList = new SpeechGrammarList();
+    for (const choice of choices) {
+      for (const phrase of choice.phrases) {
+        speechRecognitionList.addFromString(phrase.toLowerCase(), 1);
+      }
+    }
+    rec.grammars = speechRecognitionList;
+    rec.continuous = false;
+    rec.lang = "en-US";
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+
+    rec.onresult = (event) => {
+      const speechResult = event.results[0][0].transcript.toLowerCase().replaceAll(/[.,!?]/g, '');
+      const choice = choices.find((choice) => choice.phrases.map(x => x.toLowerCase()).includes(speechResult));
+      if (choice) {
+        sendWebsocketMessage({ action: "recognizeResult", content: choice.phrases[0] });
+      }
+      else {
+        sendWebsocketMessage({ action: "recognizeUnknown", content: speechResult });
+      }
+    }
+
+    if (!!prompt) {
+      await textToSpeech(prompt);
+    }
+
+    rec.start();
   }
 
   const handleMessage = (event: MessageEvent) => {
@@ -100,7 +153,7 @@ export const Phone = () => {
         break;
       case 'recognizeSpeech':
           // todo: check that call is connected, skipping for now until we have the full client to service flow
-          recognizeSpeech(message.prompt);
+          recognizeSpeech(message.choices, message.prompt);
           break;
     }
   };
