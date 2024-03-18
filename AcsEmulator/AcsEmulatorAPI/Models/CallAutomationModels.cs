@@ -47,7 +47,7 @@ namespace AcsEmulatorAPI.Models
 
     public record PlayRequest(
         List<PlaySource> playSources,
-        CommunicationIdentifier playTo,
+        List<CommunicationIdentifier> playTo,
         PlayOptions playOptions,
         string operationContext,
         string operationCallbackUri);

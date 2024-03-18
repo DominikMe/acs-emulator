@@ -71,6 +71,21 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
                             }
                             break;
                         }
+                    case "recognizeResult":
+                        {
+                            if (_connections.TryGetValue(ev.From, out var connectionId))
+                            {
+                                var connection = await dbContext.CallConnections.FindAsync(connectionId);
+                                if (connection != null)
+                                {
+                                    await _webhookPublisher.SendChoiceRecognizeCompletedAsync(
+                                        new Uri(connection.CallbackUri),
+                                        connection.Id.ToString(),
+                                        ev.Content);
+                                }
+                            }
+                            break;
+                        }
                 }
             }
 
@@ -108,7 +123,9 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
                 {
                     // place call to Emulator UI client
                     await sockets.MakePhoneCall(emulatorDeviceNumber, req.SourceCallerIdNumber?.Value, req.SourceDisplayName);
-                    _connections.Add(emulatorDeviceNumber, callConnection.Id);
+                    
+                    // just overriding any existing connection
+                    _connections[emulatorDeviceNumber] = callConnection.Id;
                 }
 
                 return Results.Created($"/calling/callConnections/{callConnection.Id}", result);
@@ -131,7 +148,10 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
                 }
 
                 List<TextSource> textSources = req.playSources?.Where(x => x.kind == PlaySourceType.Text && x.text is not null).Select(x => x.text).Cast<TextSource>().ToList();
-                if (req.playTo.PhoneNumber?.Value == emulatorDeviceNumber && !textSources.IsNullOrEmpty())
+                
+                if (!textSources.IsNullOrEmpty()
+                    && (req.playTo.IsNullOrEmpty()
+                        || req.playTo.Any(x => x.PhoneNumber?.Value == emulatorDeviceNumber)))
                 {
                     // tell Emulator UI client to synthesize text - real ACS will send audio, for our emulator the Browser's built-in speech APIs have to do
                     await sockets.PlayText(emulatorDeviceNumber, connection.SourceCallerIdNumber, textSources!.First().text);
@@ -154,13 +174,15 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
                     return Results.StatusCode(412);
                 }
 
-                if (req.recognizeOptions.targetParticipant.PhoneNumber?.Value == emulatorDeviceNumber)
+                if (req.recognizeInputType == RecognizeInputType.Choices
+                    && req.recognizeOptions.targetParticipant.PhoneNumber?.Value == emulatorDeviceNumber)
                 {
                     string prompt = (req.playPrompt.kind == PlaySourceType.Text)
                         ? req.playPrompt.text.text
                         : "";
+                    // just hard-coding to en-US for now
                     // tell Emulator UI client to recognize speech - real ACS will receive audio, for our emulator the Browser's built-in speech APIs have to do
-                    await sockets.RecognizeSpeech(emulatorDeviceNumber, connection.SourceCallerIdNumber, prompt);
+                    await sockets.RecognizeSpeech(emulatorDeviceNumber, connection.SourceCallerIdNumber, req.recognizeOptions.choices, prompt);
                 }
 
                 return Results.Accepted();

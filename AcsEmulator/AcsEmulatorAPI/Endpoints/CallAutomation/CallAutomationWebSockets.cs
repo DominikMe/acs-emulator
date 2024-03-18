@@ -77,12 +77,13 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
                     }
                 ));
 
-        public async Task RecognizeSpeech(string phoneNumber, string callerId, string prompt) => await SendMessage(phoneNumber, callerId, JsonSerializer.Serialize(
+        public async Task RecognizeSpeech(string phoneNumber, string callerId, List<Models.Choice> choices, string prompt) => await SendMessage(phoneNumber, callerId, JsonSerializer.Serialize(
                     new
                     {
                         action = "recognizeSpeech",
                         time = DateTimeOffset.UtcNow.ToString("o"),
                         callerId,
+                        choices = choices.Select(x => new { tone = x.tone.ToString(), x.phrases }).ToList(),
                         prompt
                     }
                 ));
