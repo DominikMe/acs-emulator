@@ -6,10 +6,10 @@ on:
     inputs:
       # todo: get nupkgVersion dynamically
       nupkgVersion:
-        description: "Example: 0.1.0-alpha.20230510.1"
+        description: "nupkgVersion. Example: 0.1.0-alpha.20230510.1"
         required: true
       isPreRelease:
-        description: "Indicator of whether or not is a prerelease"
+        description: "isPreRelease. Indicator of whether or not this is a prerelease"
         required: true
         type: choice
         options:
@@ -62,7 +62,7 @@ jobs:
           name: AcsEmulatorCLI ${{ github.event.inputs.nupkgVersion }}
           prerelease: ${{ github.event.inputs.isPreRelease }}
           tag_name: v${{ github.event.inputs.nupkgVersion }}
-          token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             ./AcsEmulator/AcsEmulatorCLI/nupkg/AcsEmulatorCLI.${{ github.event.inputs.nupkgVersion }}.nupkg
           body: "
