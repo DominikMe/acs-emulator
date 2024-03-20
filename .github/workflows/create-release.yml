@@ -43,6 +43,14 @@ jobs:
       - name: Build UI Project
         working-directory: ./AcsEmulator/acs-emulator-ui
         run: npm run build
+
+      - name: Create Certificate
+        working-directory: ./AcsEmulator/AcsEmulatorAPI
+        run: ./createSelfSignedCert.ps1
+
+      - name: Restore Dependencies
+        working-directory: ./AcsEmulator
+        run: dotnet restore
       
       - name: Build CLI project
         working-directory: ./AcsEmulator
