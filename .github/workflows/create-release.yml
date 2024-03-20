@@ -1,0 +1,32 @@
+# Prepares the Release artifacts, creates a new GitHub Release, and publishes the artifacts to the Release
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      # todo: get nupkgVersion dynamically
+      nupkgVersion:
+        description: "Example: 0.1.0-alpha.20230510.1"
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    name: Create Release
+    steps:
+      - name: Use Node.js v20.11.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.11.x"
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Emulator UI dependencies
+        working-directory: ./AcsEmulator/acs-emulator-ui
+        run: npm install
+
+      - name: Build project
+        working-directory: ./AcsEmulator/acs-emulator-ui
+        run: npm run build
