@@ -15,8 +15,6 @@ const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition;
 const SpeechGrammarList =
   window.SpeechGrammarList || window.webkitSpeechGrammarList;
-const SpeechRecognitionEvent =
-  window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent;
 
 interface ActiveCall { 
   callerId: string,
@@ -41,6 +39,31 @@ export const Phone = () => {
     (async () => {
       const connection = await establishPhoneConnection(phoneNumber);
       connection.webSocket.onmessage = (event) => {
+        const handleMessage = (event: MessageEvent) => {
+          const message = JSON.parse(event.data);
+          console.log(message);
+      
+          switch (message.action) {
+            case 'incomingCall':
+              setActiveCall({
+                callerId: message.callerId,
+                callerDisplayName: message.callerDisplayName,
+                startTime: new Date(message.time),
+                callState: 'ringing'
+              });
+              navigate('/PhoneUI/incomingCall');
+              break;
+            case 'playText':
+              // todo: check that call is connected, skipping for now until we have the full client to service flow
+              textToSpeech(message.text);
+              break;
+            case 'recognizeSpeech':
+                // todo: check that call is connected, skipping for now until we have the full client to service flow
+                recognizeSpeech(message.choices, message.prompt);
+                break;
+          }
+        };
+
         handleMessage(event);
       };
       phoneConnection.current = connection;
@@ -132,31 +155,6 @@ export const Phone = () => {
 
     rec.start();
   }
-
-  const handleMessage = (event: MessageEvent) => {
-    const message = JSON.parse(event.data);
-    console.log(message);
-
-    switch (message.action) {
-      case 'incomingCall':
-        setActiveCall({
-          callerId: message.callerId,
-          callerDisplayName: message.callerDisplayName,
-          startTime: new Date(message.time),
-          callState: 'ringing'
-        });
-        navigate('/PhoneUI/incomingCall');
-        break;
-      case 'playText':
-        // todo: check that call is connected, skipping for now until we have the full client to service flow
-        textToSpeech(message.text);
-        break;
-      case 'recognizeSpeech':
-          // todo: check that call is connected, skipping for now until we have the full client to service flow
-          recognizeSpeech(message.choices, message.prompt);
-          break;
-    }
-  };
 
   const incomingCallTokens: IStackTokens = {
     childrenGap: 10,
