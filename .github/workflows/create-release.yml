@@ -19,7 +19,7 @@ on:
 jobs:
   publish:
     runs-on: windows-latest
-    name: Create Release
+    name: Create New Release
     steps:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
