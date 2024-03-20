@@ -76,34 +76,27 @@ Local emulator to run Azure Communication Services client SDKs without having to
 
 Make sure you have the .NET Core SDK installed, download the latest [AcsEmulatorCLI Release](https://github.com/DominikMe/acs-emulator/releases) and then run from a terminal:
 
-
-```dotnetcli
-dotnet tool install -g --add-source [downloadFolder] AcsEmulatorCLI --version ${{ github.event.inputs.nupkgVersion }}
+```dotnetcli\n
+dotnet tool install -g --add-source [downloadFolder] AcsEmulatorCLI --version ${{ github.event.inputs.nupkgVersion }}\n
 ```
-
 
 ### Running the tool
 
-**Usage:**
-
+**Usage:**\n
 
 `acs-emulator [command] [options]`
 
+**Commands:**\n
 
-**Commands:**
-
-
-| Command            | Description                      |
-| ------------------ | -------------------------------- |
-|  `--version `        | Show version information
-|  `-?, -h, --help`    | Show help and usage information |
-|  `run`               | Run the emulator. |
-|  `openApi`           | Open the emulator's API in Swagger UI. |
-|  `openDB`            | Open the emulator's sqlite database.         |
-|  `openUI`            | Open the emulator UI. |
-|  `clean`             | Clean all data and reset the emulator state. |
-|  `connectionString`  | Get the ACS connection string for the emulator. |
-|  `repo`              | Open code repository. |
-
-
+| Command            | Description                      |\n
+| ------------------ | -------------------------------- |\n
+|  `--version `        | Show version information\n
+|  `-?, -h, --help`    | Show help and usage information |\n
+|  `run`               | Run the emulator. |\n
+|  `openApi`           | Open the emulator's API in Swagger UI. |\n
+|  `openDB`            | Open the emulator's sqlite database.         |\n
+|  `openUI`            | Open the emulator UI. |\n
+|  `clean`             | Clean all data and reset the emulator state. |\n
+|  `connectionString`  | Get the ACS connection string for the emulator. |\n
+|  `repo`              | Open code repository. |\n
 "
