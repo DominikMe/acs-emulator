@@ -66,36 +66,37 @@ jobs:
           files: |
             ./AcsEmulator/AcsEmulatorCLI/nupkg/AcsEmulatorCLI.${{ github.event.inputs.nupkgVersion }}.nupkg
           body: "
-            # Emulator for Azure Communication Services
-            Local emulator to run Azure Communication Services client SDKs without having to provision an Azure Communication Services resource.
+# Emulator for Azure Communication Services
 
-            ## Download the emulator CLI tool
+Local emulator to run Azure Communication Services client SDKs without having to provision an Azure Communication Services resource.
 
-            ### Install from GitHub
+## Download the emulator CLI tool
 
-            Make sure you have the .NET Core SDK installed, download the latest [AcsEmulatorCLI Release](https://github.com/DominikMe/acs-emulator/releases) and then run from a terminal:
+### Install from GitHub
 
-            ```dotnetcli
-            dotnet tool install -g --add-source [downloadFolder] AcsEmulatorCLI --version ${{ github.event.inputs.nupkgVersion }}
-            ```
+Make sure you have the .NET Core SDK installed, download the latest [AcsEmulatorCLI Release](https://github.com/DominikMe/acs-emulator/releases) and then run from a terminal:
 
-            ### Running the tool
+```dotnetcli
+dotnet tool install -g --add-source [downloadFolder] AcsEmulatorCLI --version ${{ github.event.inputs.nupkgVersion }}
+```
 
-            **Usage:**
+### Running the tool
 
-            `acs-emulator [command] [options]`
+**Usage:**
 
-            **Commands:**
+`acs-emulator [command] [options]`
 
-            | Command            | Description                      |
-            | ------------------ | -------------------------------- |
-            |  `--version `        | Show version information
-            |  `-?, -h, --help`    | Show help and usage information |
-            |  `run`               | Run the emulator. |
-            |  `openApi`           | Open the emulator's API in Swagger UI. |
-            |  `openDB`            | Open the emulator's sqlite database.         |
-            |  `openUI`            | Open the emulator UI. |
-            |  `clean`             | Clean all data and reset the emulator state. |
-            |  `connectionString`  | Get the ACS connection string for the emulator. |
-            |  `repo`              | Open code repository. |
-          "
+**Commands:**
+
+| Command            | Description                      |
+| ------------------ | -------------------------------- |
+|  `--version `        | Show version information
+|  `-?, -h, --help`    | Show help and usage information |
+|  `run`               | Run the emulator. |
+|  `openApi`           | Open the emulator's API in Swagger UI. |
+|  `openDB`            | Open the emulator's sqlite database.         |
+|  `openUI`            | Open the emulator UI. |
+|  `clean`             | Clean all data and reset the emulator state. |
+|  `connectionString`  | Get the ACS connection string for the emulator. |
+|  `repo`              | Open code repository. |
+"
