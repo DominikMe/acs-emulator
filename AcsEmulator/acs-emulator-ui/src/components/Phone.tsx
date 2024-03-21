@@ -15,8 +15,6 @@ const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition;
 const SpeechGrammarList =
   window.SpeechGrammarList || window.webkitSpeechGrammarList;
-const SpeechRecognitionEvent =
-  window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent;
 
 interface ActiveCall { 
   callerId: string,
@@ -45,6 +43,8 @@ export const Phone = () => {
       };
       phoneConnection.current = connection;
     })();
+    // todo: more gracefully resolve eslint error
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const callNumber = () => {
