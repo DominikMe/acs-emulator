@@ -1,7 +1,6 @@
 ﻿using AcsEmulatorAPI.Models;
 using AcsEmulatorAPI.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace AcsEmulatorAPI.Endpoints.CallAutomation
 {
@@ -149,8 +148,8 @@ namespace AcsEmulatorAPI.Endpoints.CallAutomation
 
                 List<TextSource> textSources = req.playSources?.Where(x => x.kind == PlaySourceType.Text && x.text is not null).Select(x => x.text).Cast<TextSource>().ToList();
                 
-                if (!textSources.IsNullOrEmpty()
-                    && (req.playTo.IsNullOrEmpty()
+                if (textSources?.Count != 0
+                    && (req.playTo.Count == 0
                         || req.playTo.Any(x => x.PhoneNumber?.Value == emulatorDeviceNumber)))
                 {
                     // tell Emulator UI client to synthesize text - real ACS will send audio, for our emulator the Browser's built-in speech APIs have to do

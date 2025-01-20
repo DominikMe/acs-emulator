@@ -1,7 +1,4 @@
-﻿using Azure;
-using Azure.Messaging.EventGrid;
-using Humanizer;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using Azure.Messaging.EventGrid;
 
 namespace AcsEmulatorAPI.Endpoints.Sms
 {
