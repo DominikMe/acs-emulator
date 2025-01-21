@@ -82,6 +82,7 @@ export const EmailMessages = () => {
       fieldName: 'subject',
       minWidth: 150,
       maxWidth: 250,
+      isMultiline: true,
       data: 'string'
     },
     {
@@ -90,6 +91,7 @@ export const EmailMessages = () => {
       fieldName: 'plainText',
       minWidth: 150,
       maxWidth: 250,
+      isMultiline: true,
       data: 'string'
     },
     {
@@ -98,6 +100,7 @@ export const EmailMessages = () => {
       fieldName: 'html',
       minWidth: 150,
       maxWidth: 250,
+      isMultiline: true,
       data: 'string'
     },
     {
