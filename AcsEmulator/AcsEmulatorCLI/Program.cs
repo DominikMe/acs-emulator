@@ -74,9 +74,9 @@ class Program
 		{
 			using Process install = new();
 			install.StartInfo.WorkingDirectory = AppContext.BaseDirectory;
-			install.StartInfo.FileName = "npm.cmd";
+			install.StartInfo.FileName = "npm";
 			install.StartInfo.Arguments = "install -g serve";
-			install.StartInfo.UseShellExecute = false;
+			install.StartInfo.UseShellExecute = true;
 			install.Start();
 			install.WaitForExit();
 
